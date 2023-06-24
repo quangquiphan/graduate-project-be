@@ -10,4 +10,6 @@ public interface ApiPath {
     String EDUCATION_APIs = BASE_API + "/education";
 
     String WORK_HISTORY_APIs = BASE_API + "/work-history";
+
+    String CANDIDATE_APIs = BASE_API + "/candidate";
 }

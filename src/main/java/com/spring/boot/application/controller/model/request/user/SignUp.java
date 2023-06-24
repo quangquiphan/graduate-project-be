@@ -12,7 +12,8 @@ import javax.validation.constraints.Email;
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SignUp {
-    @Email
+    private String firstName;
+    private String lastName;
     private String email;
     private String passwordHash;
     private String confirmPassword;

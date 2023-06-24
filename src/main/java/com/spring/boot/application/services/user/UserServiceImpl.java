@@ -6,40 +6,53 @@ import com.spring.boot.application.common.utils.*;
 import com.spring.boot.application.config.jwt.JwtTokenUtil;
 import com.spring.boot.application.controller.model.request.auth.ChangePassword;
 import com.spring.boot.application.controller.model.request.user.SignUp;
-import com.spring.boot.application.entity.Session;
-import com.spring.boot.application.entity.User;
-import com.spring.boot.application.repositories.SessionRepository;
-import com.spring.boot.application.repositories.UserRepository;
+import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
+import com.spring.boot.application.controller.model.response.user.CandidateResponse;
+import com.spring.boot.application.entity.*;
+import com.spring.boot.application.repositories.*;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService{
 
     final private UserRepository userRepository;
-    final private JwtTokenUtil jwtTokenUtil;
     final private SessionRepository sessionRepository;
+    final private EducationRepository educationRepository;
+    final private WorkHistoryRepository workHistoryRepository;
+    final private ProjectRepository projectRepository;
+    final private JwtTokenUtil jwtTokenUtil;
 
     public UserServiceImpl(
             UserRepository userRepository,
             JwtTokenUtil jwtTokenUtil,
-            SessionRepository sessionRepository) {
+            SessionRepository sessionRepository,
+            EducationRepository educationRepository,
+            WorkHistoryRepository workHistoryRepository,
+            ProjectRepository projectRepository
+    ) {
         this.userRepository = userRepository;
         this.jwtTokenUtil = jwtTokenUtil;
         this.sessionRepository = sessionRepository;
+        this.educationRepository = educationRepository;
+        this.workHistoryRepository = workHistoryRepository;
+        this.projectRepository = projectRepository;
     }
 
     @Value("${project.sources}")
     private String root;
-
     @Override
     public Session signUp(SignUp signUp, PasswordEncoder passwordEncoder) {
         User user = userRepository.getByEmailAndStatus(signUp.getEmail(), Status.ACTIVE);
@@ -54,12 +67,14 @@ public class UserServiceImpl implements UserService{
         User newUser = new User();
 
         newUser.setId(UniqueID.getUUID());
+        newUser.setAvatar(null);
         newUser.setEmail(signUp.getEmail());
         newUser.setPasswordSalt(AppUtil.generateSalt());
         newUser.setPasswordHash(
                 passwordEncoder.encode(signUp.getPasswordHash().concat(newUser.getPasswordSalt())));
         newUser.setRole(signUp.getRole());
         newUser.setStatus(Status.ACTIVE);
+        newUser.setCv(null);
 
         userRepository.save(newUser);
 
@@ -84,7 +99,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
-        return upload(user, "cv/", file, true);
+        return upload(user, "static/cv/", file, true);
     }
 
     @Override
@@ -107,6 +122,22 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public CandidateResponse getCandidate(String id) throws IOException {
+        User user = userRepository.getById(id);
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+
+        List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
+        List<Education> educations = educationRepository.getAllByUserId(user.getId());
+        List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(user.getId());
+
+        for (int i = 0; i < workHistories.size(); i++) {
+            List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
+            workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
+        }
+        return new CandidateResponse(user, getUrl(id, false), getUrl(id, true), workHistoryResponses, educations);
+    }
+
+    @Override
     public String deleteUser(String id) {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
@@ -120,6 +151,27 @@ public class UserServiceImpl implements UserService{
 
         String[] fileName = file.split("\\.");
         return fileName[fileName.length - 1];
+    }
+
+    private String getUrl(String id, boolean isCV) throws IOException{
+        User user = userRepository.getById(id);
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
+        System.out.println(FileUtils.readFileToByteArray(new File("urc/resources/images" + user.getAvatar())));
+        if (!isCV && Validator.isValidParam(user.getAvatar()))
+            return ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/images/")
+                    .path(user.getAvatar())
+                    .toUriString();
+
+        if (isCV && Validator.isValidParam(user.getCv()))
+            return ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/cv/")
+                    .path(user.getCv())
+                    .toUriString();
+
+        return "";
     }
 
     private User upload(User user, String path, MultipartFile file, boolean isCv) throws IOException{
