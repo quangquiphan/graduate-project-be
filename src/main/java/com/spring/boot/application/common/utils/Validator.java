@@ -93,4 +93,21 @@ public class Validator {
         }
     }
 
+    public static boolean isValidObject(List<?> list) {
+        if (list.isEmpty() || list.equals("") || list.size() == 0)
+            return false;
+        return true;
+    }
+
+    public static boolean isValidObject(Object obj) {
+        if ("".equals(obj) || obj == null)
+            return false;
+        return true;
+    }
+
+    public static boolean isValidParam(String param) {
+        if ("".equals(param) || param == null)
+            return false;
+        return true;
+    }
 }
