@@ -59,7 +59,6 @@ public class AuthenticatedController extends AbstractBaseController {
     public ResponseEntity<RestAPIResponse> getAuthInfo(
             HttpServletRequest request
     ) {
-        System.out.println(request.getHeader(Constant.HEADER_TOKEN));
         return responseUtil.successResponse(jwtTokenUtil.getUserIdFromJWT(request.getHeader(Constant.HEADER_TOKEN)));
     }
 

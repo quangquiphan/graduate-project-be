@@ -10,7 +10,6 @@ import com.spring.boot.application.controller.model.response.experience.WorkHist
 import com.spring.boot.application.controller.model.response.user.CandidateResponse;
 import com.spring.boot.application.entity.*;
 import com.spring.boot.application.repositories.*;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -156,11 +155,10 @@ public class UserServiceImpl implements UserService{
     private String getUrl(String id, boolean isCV) throws IOException{
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
-        System.out.println(FileUtils.readFileToByteArray(new File("urc/resources/images" + user.getAvatar())));
         if (!isCV && Validator.isValidParam(user.getAvatar()))
             return ServletUriComponentsBuilder
                     .fromCurrentContextPath()
-                    .path("/images/")
+                    .path("/static/images/")
                     .path(user.getAvatar())
                     .toUriString();
 
