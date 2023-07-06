@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface EducationRepository extends JpaRepository<Education, String> {
     List<Education> getAllByUserId(String userId);
+
+    Education getById(String id);
 }
