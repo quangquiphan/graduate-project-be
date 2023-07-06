@@ -39,7 +39,7 @@ public class JwtTokenUtil {
                 .setSigningKey(JWT_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
-        User user = userRepository.getById(claims.getId());
+        User user = userRepository.getById(claims.getIssuer());
         return new AuthUser(user);
     }
 

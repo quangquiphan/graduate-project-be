@@ -37,7 +37,7 @@ public class AuthenticatedController extends AbstractBaseController {
     }
 
     @Operation(summary = "signIn")
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(path = "/sign-in", method = RequestMethod.POST)
     public ResponseEntity<RestAPIResponse> signIn(
             @RequestBody SignIn signIn
     ) {
@@ -45,7 +45,7 @@ public class AuthenticatedController extends AbstractBaseController {
     }
 
     @Operation(summary = "changePassword")
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(path = "/change-password", method = RequestMethod.PUT)
     public ResponseEntity<RestAPIResponse> changePassword(
             @RequestBody ChangePassword changePassword,
             HttpServletRequest request
@@ -55,7 +55,7 @@ public class AuthenticatedController extends AbstractBaseController {
     }
 
     @Operation(summary = "getAuthInfo")
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(path = "/info", method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAuthInfo(
             HttpServletRequest request
     ) {
@@ -63,7 +63,7 @@ public class AuthenticatedController extends AbstractBaseController {
     }
 
     @Operation(summary = "logout")
-    @RequestMapping(method = RequestMethod.DELETE)
+    @RequestMapping(path = "/logout", method = RequestMethod.DELETE)
     public ResponseEntity<RestAPIResponse> logout(
             HttpServletRequest request
     ) {
