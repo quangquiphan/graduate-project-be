@@ -11,40 +11,36 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @Entity
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "education")
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "company")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
-public class Education extends BaseEntity implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Company extends BaseEntity implements Serializable {
     @Id
     @Column(name = "id", nullable = false, length = 64)
     private String id;
 
-    @Column(name = "school_name")
-    private String schoolName;
+    @Column(name = "avatar")
+    private String avatar;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "background")
+    private String background;
 
-    @Column(name = "major")
-    private String major;
+    @Column(name = "company_name")
+    private String companyName;
 
-    @Column(name = "from_date")
-    private Date fromDate;
+    @Column(name = "overview")
+    private String overview;
 
-    @Column(name = "to_date")
-    private Date toDate;
+    @Column(name = "company_employee")
+    private String companyEmployee;
 
-    @Column(name = "is_current")
-    private boolean isCurrent;
-
-    @Column(name = "user_id", length = 64)
-    private String userId;
+    @Column(name = "address")
+    private String address;
 }

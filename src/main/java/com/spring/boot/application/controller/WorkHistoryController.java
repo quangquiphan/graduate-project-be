@@ -1,6 +1,8 @@
 package com.spring.boot.application.controller;
 
 import com.spring.boot.application.common.AbstractBaseController;
+import com.spring.boot.application.common.auth.AuthorizeValidator;
+import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
 import com.spring.boot.application.controller.model.request.experience.AddWorkHistory;
 import com.spring.boot.application.services.experience.WorkHistoryService;
@@ -20,6 +22,7 @@ public class WorkHistoryController extends AbstractBaseController {
     }
 
     @Operation(summary = "addWorkHistory")
+    @AuthorizeValidator(UserRole.USER)
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<RestAPIResponse> addWorkHistory(
             @RequestBody AddWorkHistory workHistory
@@ -28,6 +31,7 @@ public class WorkHistoryController extends AbstractBaseController {
     }
 
     @Operation(summary = "deleteWorkHistory")
+    @AuthorizeValidator({UserRole.USER, UserRole.ADMIN})
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<RestAPIResponse> deleteWorkHistory(
             @PathVariable(name = "id") String id

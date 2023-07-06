@@ -10,6 +10,8 @@ import com.spring.boot.application.controller.model.response.experience.WorkHist
 import com.spring.boot.application.controller.model.response.user.CandidateResponse;
 import com.spring.boot.application.entity.*;
 import com.spring.boot.application.repositories.*;
+import com.spring.boot.application.services.mail.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,8 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService{
-
+    @Autowired
+    private EmailService emailService;
     final private UserRepository userRepository;
     final private SessionRepository sessionRepository;
     final private EducationRepository educationRepository;
@@ -54,35 +57,50 @@ public class UserServiceImpl implements UserService{
     private String root;
     @Override
     public Session signUp(SignUp signUp, PasswordEncoder passwordEncoder) {
-        User user = userRepository.getByEmailAndStatus(signUp.getEmail(), Status.ACTIVE);
+        User exsitUser = userRepository.getByEmailAndStatus(signUp.getEmail(), Status.ACTIVE);
 
         // Check valid params
-        Validator.mustNull(user, RestAPIStatus.EXISTED, "User is exist");
+        Validator.mustNull(exsitUser, RestAPIStatus.EXISTED, "User is exist");
         Validator.notNullAndNotEmptyParam(signUp.getEmail(), RestAPIStatus.BAD_PARAMS, "Email not null");
         Validator.validEmailAddressRegex(signUp.getEmail(), RestAPIStatus.BAD_PARAMS, "Email invalid");
         Validator.notNullAndNotEmptyParam(signUp.getPasswordHash(), RestAPIStatus.BAD_PARAMS, "Password not null");
         Validator.mustEquals(signUp.getPasswordHash(), signUp.getConfirmPassword(), RestAPIStatus.BAD_REQUEST, "Password and confirm password not match");
 
-        User newUser = new User();
+        User user = new User();
 
-        newUser.setId(UniqueID.getUUID());
-        newUser.setAvatar(null);
-        newUser.setEmail(signUp.getEmail());
-        newUser.setPasswordSalt(AppUtil.generateSalt());
-        newUser.setPasswordHash(
-                passwordEncoder.encode(signUp.getPasswordHash().concat(newUser.getPasswordSalt())));
-        newUser.setRole(signUp.getRole());
-        newUser.setStatus(Status.ACTIVE);
-        newUser.setCv(null);
+        user.setId(UniqueID.getUUID());
+        user.setAvatar(null);
+        user.setFirstName(signUp.getFirstName());
+        user.setLastName(signUp.getLastName());
+        user.setEmail(signUp.getEmail());
+        user.setPasswordSalt(AppUtil.generateSalt());
+        user.setPasswordHash(
+                passwordEncoder.encode(signUp.getPasswordHash().concat(user.getPasswordSalt())));
+        user.setRole(signUp.getRole());
+        user.setStatus(Status.IN_ACTIVE);
+        user.setCv(null);
+        user.setActiveCode(UniqueID.randomStringPin());
 
-        userRepository.save(newUser);
+        userRepository.save(user);
 
         Session session = new Session();
-        session.setAccessToken(jwtTokenUtil.generateAccessToken(newUser));
-        session.setUserId(newUser.getId());
+        session.setAccessToken(jwtTokenUtil.generateAccessToken(user));
+        session.setUserId(user.getId());
         session.setCreatedDate(DateUtil.convertToUTC(new Date()));
         session.setExpiryDate(DateUtil.addHoursToJavaUtilDate(new Date(), 24));
+
+        emailService.confirmRegisterAccount(user);
         return sessionRepository.save(session);
+    }
+
+    @Override
+    public String verifyEmail(String activeCode) {
+        User user = userRepository.getByActiveCodeAndStatus(activeCode, Status.IN_ACTIVE);
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+
+        user.setStatus(Status.ACTIVE);
+        userRepository.save(user);
+        return "Email verified";
     }
 
     @Override

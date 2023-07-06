@@ -29,7 +29,7 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "id", length = 64, nullable = false)
     private String id;
 
-    @Column(name = "active_code")
+    @Column(name = "active_code", length = 12)
     private String activeCode;
 
     @Column(name = "avatar")
@@ -44,7 +44,7 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", length = 11)
     private String phoneNumber;
 
     @Column(name = "password_salt")
@@ -64,4 +64,7 @@ public class User extends BaseEntity implements Serializable {
 
     @Column(name = "status")
     private Status status;
+
+    @Column(name = "company_id")
+    private String companyId;
 }

@@ -18,7 +18,7 @@ public class UniqueID {
     static Random rnd = new Random();
     public static String randomStringPin() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 12; i++) {
             sb.append(P.charAt(rnd.nextInt(P.length())));
         }
         return sb.toString();

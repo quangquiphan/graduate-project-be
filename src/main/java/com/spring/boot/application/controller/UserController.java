@@ -4,9 +4,10 @@ import com.spring.boot.application.common.AbstractBaseController;
 import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
-import com.spring.boot.application.common.utils.RestAPIStatus;
-import com.spring.boot.application.common.utils.Validator;
+import com.spring.boot.application.controller.model.request.experience.AddWorkHistory;
 import com.spring.boot.application.controller.model.request.user.SignUp;
+import com.spring.boot.application.controller.model.request.user.SubmitProfile;
+import com.spring.boot.application.services.experience.WorkHistoryService;
 import com.spring.boot.application.services.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.MediaType;
@@ -40,9 +41,23 @@ public class UserController extends AbstractBaseController {
         return responseUtil.successResponse(userService.signUp(signUp, passwordEncoder));
     }
 
+    @Operation(summary = "verifyEmail")
+    @RequestMapping(path = "/verify-email/{activeCode}", method = RequestMethod.PUT)
+    public ResponseEntity<RestAPIResponse> verifyEmail(
+            @PathVariable String activeCode
+    ) {
+        return responseUtil.successResponse(userService.verifyEmail(activeCode));
+    }
+
     @Operation(summary = "uploadAvatar")
-    @AuthorizeValidator({UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY, UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
-    @RequestMapping(path = "/upload-avatar/{id}", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @AuthorizeValidator(
+            {UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY,
+                    UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
+    @RequestMapping(
+            path = "/upload-avatar/{id}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<RestAPIResponse> uploadAvatar(
             @PathVariable String id,
             @RequestPart("avatar") MultipartFile file
@@ -51,8 +66,14 @@ public class UserController extends AbstractBaseController {
     }
 
     @Operation(summary = "uploadCV")
-    @AuthorizeValidator({UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY, UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
-    @RequestMapping(path = "/upload-cv/{id}", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @AuthorizeValidator(
+            {UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY,
+                    UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
+    @RequestMapping(
+            path = "/upload-cv/{id}",
+            method = RequestMethod.PUT,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<RestAPIResponse> uploadCV(
             @PathVariable String id,
             @RequestPart("CV") MultipartFile file

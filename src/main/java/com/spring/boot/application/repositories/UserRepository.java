@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface UserRepository extends JpaRepository<User, String> {
     User getById(String id);
     User getByEmailAndStatus(String email, Status status);
+    User getByActiveCodeAndStatus(String activeCode, Status status);
     @Query(value = " SELECT u"
                  + " FROM User u INNER JOIN Session s ON u.id = s.userId"
                  + " WHERE s.accessToken =: token")

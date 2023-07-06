@@ -14,4 +14,6 @@ public interface ApiPath {
     String CANDIDATE_APIs = BASE_API + "/candidate";
 
     String SKILL_APIs = BASE_API + "/skill";
+
+    String COMPANY_APIs = BASE_API + "/company";
 }
