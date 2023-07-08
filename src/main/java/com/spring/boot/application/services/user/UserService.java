@@ -13,7 +13,6 @@ import java.io.IOException;
 public interface UserService {
     Session signUp(SignUp signUp, PasswordEncoder passwordEncoder);
     String verifyEmail(String activeCode);
-
     User uploadAvatar(String id, MultipartFile file) throws IOException;
     User uploadCV(String id, MultipartFile file) throws IOException;
     User changePassword(String token, ChangePassword changePassword, PasswordEncoder passwordEncoder);

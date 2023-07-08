@@ -17,4 +17,11 @@ public class AppUtil {
         RANDOM.nextBytes(salt);
         return Base64.getEncoder().encodeToString(salt);
     }
+
+    public static String getFileExtension(String file) {
+        if (file == null) return null;
+
+        String[] fileName = file.split("\\.");
+        return fileName[fileName.length - 1];
+    }
 }

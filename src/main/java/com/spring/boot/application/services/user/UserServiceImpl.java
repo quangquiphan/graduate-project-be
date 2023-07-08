@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService{
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
-        return upload(user, "static/cv/", file, true);
+        return upload(user, "cv/", file, true);
     }
 
     @Override
@@ -163,13 +163,6 @@ public class UserServiceImpl implements UserService{
         return "Delete successfully!";
     }
 
-    private String getFileExtension(String file) {
-        if (file == null) return null;
-
-        String[] fileName = file.split("\\.");
-        return fileName[fileName.length - 1];
-    }
-
     private String getUrl(String id, boolean isCV) throws IOException{
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
@@ -192,7 +185,7 @@ public class UserServiceImpl implements UserService{
 
     private User upload(User user, String path, MultipartFile file, boolean isCv) throws IOException{
         // File name
-        String name = user.getId() + "." + getFileExtension(file.getOriginalFilename());
+        String name = user.getId() + "." + AppUtil.getFileExtension(file.getOriginalFilename());
 
         // Full path
         String filePath = root + path + name;

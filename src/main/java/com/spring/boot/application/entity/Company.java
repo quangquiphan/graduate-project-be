@@ -35,12 +35,18 @@ public class Company extends BaseEntity implements Serializable {
     @Column(name = "company_name")
     private String companyName;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Column(name = "overview")
     private String overview;
 
-    @Column(name = "company_employee")
-    private String companyEmployee;
+    @Column(name = "size")
+    private String size;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "website")
+    private String website;
 }

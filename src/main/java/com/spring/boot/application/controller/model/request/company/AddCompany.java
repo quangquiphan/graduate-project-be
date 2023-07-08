@@ -6,12 +6,16 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Column;
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class AddCompany {
     private String companyName;
-    private String companyEmployee;
+    private String email;
+    private String phoneNumber;
     private String overview;
-    private String address;
+    private String size;
+    private String website;
 }

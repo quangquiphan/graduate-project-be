@@ -18,12 +18,9 @@
                     background: #FFFFFF">
             <div style="padding: 0 20px; width: 100%">
                 <p style="margin-bottom: 20px">Dear
-                    <span th:text="${first_name + ' ' + last_name}"></span><span>,</span>
+                    <span th:text="${company_name}"></span><span>,</span>
                 </p>
-                <p>
-                    <span>Verify code your email: </span>
-                    <span th:text="${active_code}"></span>
-                </p>
+                <p>Click <a th:href="@{'http://localhost:4203/reset-password/'(${zjlxvnjl})}">here</a> to create account</p>
             </div>
         </div>
     </div>

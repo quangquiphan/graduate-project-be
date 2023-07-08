@@ -1,5 +1,6 @@
 package com.spring.boot.application.services.mail;
 
+import com.spring.boot.application.entity.Company;
 import com.spring.boot.application.entity.User;
 import com.spring.boot.application.services.mail.thymleaf.ThymeleafService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,33 @@ public class EmailServiceImpl implements EmailService{
 
 
             helper.setText(thymeleafService.createdContent("confirm-register-account.html", variables), true);
+
+            mailSender.send(message);
+            System.out.println("done ....");
+        } catch (Exception e) {
+            e.getMessage();
+        }
+    }
+
+    @Override
+    public void addAccountCompany(Company company) {
+        try {
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("company_name", company.getCompanyName());
+
+            MimeMessage message = mailSender.createMimeMessage();
+
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+
+            helper.setFrom(email);
+            helper.setTo(company.getEmail());
+            helper.setSubject("Create account company");
+
+
+            helper.setText(thymeleafService.createdContent("add-company-account.html", variables), true);
 
             mailSender.send(message);
             System.out.println("done ....");
