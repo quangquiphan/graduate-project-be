@@ -5,9 +5,11 @@
     <title>Verify Email</title>
 </head>
 <body style="margin: 0; padding: 0; box-sizing: border-box;">
+    <div style="margin-bottom: 30px; width: 100%">
+        <img th:src="${logo}" style="margin: auto; width: 150px; display: block">
+    </div>
     <div style="width: 565px;
-                padding-top: 100px;
-                padding-bottom: 100px;
+                padding: 100px 0;
                 background: #f4fafe;
                 border: 1px solid #75bef8;
                 border-radius: 10px;
@@ -16,13 +18,12 @@
                     width: 100%;
                     height: 200px;
                     background: #FFFFFF">
-            <div style="padding: 0 20px; width: 100%">
+            <div style="padding: 0 20px; width: 100%; margin: auto">
                 <p style="margin-bottom: 20px">Dear
-                    <span th:text="${first_name + ' ' + last_name}"></span><span>,</span>
+                    <span style="font-weight: bold" th:text="${full_name}"></span><span>,</span>
                 </p>
                 <p>
-                    <span>Verify code your email: </span>
-                    <span th:text="${active_code}"></span>
+                    <span>click <a th:href="${link}" style="color: dodgerblue">here</a> to verify code email</span>
                 </p>
             </div>
         </div>

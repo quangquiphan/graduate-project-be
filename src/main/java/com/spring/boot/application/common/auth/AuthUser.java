@@ -4,6 +4,8 @@ import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.Validator;
+import com.spring.boot.application.controller.model.response.company.AuthCompany;
+import com.spring.boot.application.entity.Company;
 import com.spring.boot.application.entity.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,6 +37,9 @@ public class AuthUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @Getter
+    private AuthCompany company;
+
     public AuthUser(User user) {
         this.id = user.getId();
         this.avatar = getUrl(user);
@@ -45,6 +50,19 @@ public class AuthUser implements UserDetails {
         this.role = user.getRole();
         this.status = user.getStatus();
     }
+
+    public AuthUser(User user, AuthCompany c) {
+        this.id = user.getId();
+        this.avatar = getUrl(user);
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.email = user.getEmail();
+        this.phoneNumber = user.getPhoneNumber();
+        this.role = user.getRole();
+        this.status = user.getStatus();
+        this.company = c;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;

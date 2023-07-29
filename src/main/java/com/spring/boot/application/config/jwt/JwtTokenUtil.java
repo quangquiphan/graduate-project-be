@@ -2,14 +2,20 @@ package com.spring.boot.application.config.jwt;
 
 import com.spring.boot.application.common.auth.AuthUser;
 import com.spring.boot.application.common.exceptions.ApplicationException;
+import com.spring.boot.application.common.utils.AppUtil;
 import com.spring.boot.application.common.utils.RestAPIStatus;
+import com.spring.boot.application.common.utils.Validator;
+import com.spring.boot.application.controller.model.response.company.AuthCompany;
+import com.spring.boot.application.entity.Company;
 import com.spring.boot.application.entity.User;
+import com.spring.boot.application.repositories.CompanyRepository;
 import com.spring.boot.application.repositories.UserRepository;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 
 @Component
@@ -19,6 +25,9 @@ public class JwtTokenUtil {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000;
 
@@ -40,6 +49,19 @@ public class JwtTokenUtil {
                 .parseClaimsJws(token)
                 .getBody();
         User user = userRepository.getById(claims.getIssuer());
+
+        if (!user.getCompanyId().isEmpty()) {
+            Company company = companyRepository.getById(user.getCompanyId());
+            Validator.notNull(company, RestAPIStatus.NOT_FOUND, "");
+            try {
+                return new AuthUser(user,
+                        new AuthCompany(company, AppUtil.getUrlCompany(company, true),
+                                AppUtil.getUrlCompany(company, false)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         return new AuthUser(user);
     }
 

@@ -3,7 +3,7 @@ package com.spring.boot.application.services.education;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
-import com.spring.boot.application.controller.model.request.education.AddEducation;
+import com.spring.boot.application.controller.model.request.education.EducationRequest;
 import com.spring.boot.application.entity.Education;
 import com.spring.boot.application.repositories.EducationRepository;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class EducationServicesImpl implements EducationService{
     }
 
     @Override
-    public Education addEducation(AddEducation addEducation) {
+    public Education addEducation(EducationRequest addEducation) {
         Validator.notNullAndNotEmptyParam(addEducation.getUserId(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(addEducation.getSchoolName(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(addEducation.getCourse(), RestAPIStatus.BAD_PARAMS, "");
@@ -40,7 +40,12 @@ public class EducationServicesImpl implements EducationService{
     }
 
     @Override
-    public Education updateEducation(String id, AddEducation updateEducation) {
+    public Education getEducation(String id) {
+        return educationRepository.getById(id);
+    }
+
+    @Override
+    public Education updateEducation(String id, EducationRequest updateEducation) {
         Validator.notNullAndNotEmptyParam(updateEducation.getUserId(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(updateEducation.getSchoolName(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(updateEducation.getCourse(), RestAPIStatus.BAD_PARAMS, "");

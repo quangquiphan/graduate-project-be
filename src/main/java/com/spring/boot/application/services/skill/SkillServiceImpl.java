@@ -3,7 +3,7 @@ package com.spring.boot.application.services.skill;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
-import com.spring.boot.application.controller.model.request.skill.AddSkill;
+import com.spring.boot.application.controller.model.request.skill.SkillRequest;
 import com.spring.boot.application.entity.Skill;
 import com.spring.boot.application.repositories.SkillRepository;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class SkillServiceImpl implements SkillService{
     }
 
     @Override
-    public Skill addSkill(AddSkill skill) {
+    public Skill addSkill(SkillRequest skill) {
         Validator.notNullAndNotEmptyParam(skill.getSkillName(), RestAPIStatus.BAD_PARAMS, "Skill name not null");
         Skill s = new Skill();
         s.setId(UniqueID.getUUID());
@@ -29,7 +29,7 @@ public class SkillServiceImpl implements SkillService{
     }
 
     @Override
-    public Skill updateSkill(String id, AddSkill addSkill) {
+    public Skill updateSkill(String id, SkillRequest addSkill) {
         Skill skill = skillRepository.getById(id);
 
         Validator.notNullAndNotEmpty(skill, RestAPIStatus.NOT_FOUND, "");

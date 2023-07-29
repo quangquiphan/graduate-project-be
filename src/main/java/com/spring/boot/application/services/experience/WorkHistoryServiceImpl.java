@@ -3,7 +3,7 @@ package com.spring.boot.application.services.experience;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
-import com.spring.boot.application.controller.model.request.experience.AddWorkHistory;
+import com.spring.boot.application.controller.model.request.experience.WorkHistoryRequest;
 import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
 import com.spring.boot.application.entity.Project;
 import com.spring.boot.application.entity.WorkHistory;
@@ -28,7 +28,7 @@ public class WorkHistoryServiceImpl implements WorkHistoryService{
     }
 
     @Override
-    public WorkHistoryResponse addWorkHistory(AddWorkHistory workHistory) {
+    public WorkHistoryResponse addWorkHistory(WorkHistoryRequest workHistory) {
         Validator.notNullAndNotEmptyParam(workHistory.getCompanyName(), RestAPIStatus.BAD_PARAMS, "");
 
         WorkHistory history = new WorkHistory();
@@ -59,6 +59,16 @@ public class WorkHistoryServiceImpl implements WorkHistoryService{
 
         workHistoryRepository.save(history);
         projectRepository.saveAll(projects);
+        return new WorkHistoryResponse(history, projects);
+    }
+
+    @Override
+    public WorkHistoryResponse getWorkHistory(String id) {
+        WorkHistory history = workHistoryRepository.getById(id);
+        Validator.notNull(history, RestAPIStatus.NOT_FOUND, "");
+
+        List<Project> projects = projectRepository.getAllByWorkHistoryId(id);
+
         return new WorkHistoryResponse(history, projects);
     }
 

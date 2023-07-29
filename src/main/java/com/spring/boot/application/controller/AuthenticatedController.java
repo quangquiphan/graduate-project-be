@@ -5,17 +5,17 @@ import com.spring.boot.application.common.exceptions.ApplicationException;
 import com.spring.boot.application.common.utils.Constant;
 import com.spring.boot.application.common.utils.RestAPIResponse;
 import com.spring.boot.application.common.utils.RestAPIStatus;
+import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.controller.model.request.auth.ChangePassword;
+import com.spring.boot.application.controller.model.request.auth.ForgotPasswordRequest;
+import com.spring.boot.application.controller.model.request.auth.ResetPasswordRequest;
 import com.spring.boot.application.controller.model.request.auth.SignIn;
 import com.spring.boot.application.services.session.SessionService;
 import com.spring.boot.application.services.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -52,6 +52,25 @@ public class AuthenticatedController extends AbstractBaseController {
     ) {
         return responseUtil.successResponse(
                 userService.changePassword(request.getHeader(Constant.HEADER_TOKEN), changePassword, passwordEncoder));
+    }
+
+    @Operation(summary = "forgotPassword")
+    @RequestMapping(path = "/forgot-password", method = RequestMethod.POST)
+    public ResponseEntity<RestAPIResponse> forgotPassword(
+            @RequestBody ForgotPasswordRequest forgotPasswordRequest
+
+            ) {
+        return responseUtil.successResponse(userService.forgotPassword(forgotPasswordRequest));
+    }
+
+    @Operation(summary = "resetPassword")
+    @RequestMapping(path = "/reset-password/{reset-code}", method = RequestMethod.PUT)
+    public ResponseEntity<RestAPIResponse> resetPassword(
+            @PathVariable(name = "reset-code") String resetCode,
+            @RequestBody ResetPasswordRequest resetPasswordRequest
+
+    ) {
+        return responseUtil.successResponse(userService.resetPassword(resetCode, resetPasswordRequest, passwordEncoder));
     }
 
     @Operation(summary = "getAuthInfo")

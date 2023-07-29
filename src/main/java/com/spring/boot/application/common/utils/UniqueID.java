@@ -35,12 +35,12 @@ public class UniqueID {
             if (b1 < 10) {
                 buffer.append((char) ('0' + b1));
             } else {
-                buffer.append((char) ('A' + (b1 - 10)));
+                buffer.append((char) ('a' + (b1 - 10)));
             }
             if (b2 < 10) {
                 buffer.append((char) ('0' + b2));
             } else {
-                buffer.append((char) ('A' + (b2 - 10)));
+                buffer.append((char) ('a' + (b2 - 10)));
             }
         }
         return (buffer.toString());

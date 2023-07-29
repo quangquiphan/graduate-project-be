@@ -14,6 +14,8 @@ import javax.validation.constraints.Email;
 public class SignUp {
     private String firstName;
     private String lastName;
+    private String phoneNumber;
+    private String major;
     private String email;
     private String passwordHash;
     private String confirmPassword;

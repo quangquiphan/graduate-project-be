@@ -1,29 +1,31 @@
 package com.spring.boot.application.services.user;
 
 import com.spring.boot.application.common.enums.Status;
+import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.exceptions.ApplicationException;
 import com.spring.boot.application.common.utils.*;
-import com.spring.boot.application.config.jwt.JwtTokenUtil;
 import com.spring.boot.application.controller.model.request.auth.ChangePassword;
+import com.spring.boot.application.controller.model.request.auth.ForgotPasswordRequest;
+import com.spring.boot.application.controller.model.request.auth.ResetPasswordRequest;
 import com.spring.boot.application.controller.model.request.user.SignUp;
 import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
-import com.spring.boot.application.controller.model.response.user.CandidateResponse;
+import com.spring.boot.application.controller.model.response.user.UserResponse;
 import com.spring.boot.application.entity.*;
 import com.spring.boot.application.repositories.*;
 import com.spring.boot.application.services.mail.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -31,23 +33,17 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private EmailService emailService;
     final private UserRepository userRepository;
-    final private SessionRepository sessionRepository;
     final private EducationRepository educationRepository;
     final private WorkHistoryRepository workHistoryRepository;
     final private ProjectRepository projectRepository;
-    final private JwtTokenUtil jwtTokenUtil;
 
     public UserServiceImpl(
             UserRepository userRepository,
-            JwtTokenUtil jwtTokenUtil,
-            SessionRepository sessionRepository,
             EducationRepository educationRepository,
             WorkHistoryRepository workHistoryRepository,
             ProjectRepository projectRepository
     ) {
         this.userRepository = userRepository;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.sessionRepository = sessionRepository;
         this.educationRepository = educationRepository;
         this.workHistoryRepository = workHistoryRepository;
         this.projectRepository = projectRepository;
@@ -56,7 +52,7 @@ public class UserServiceImpl implements UserService{
     @Value("${project.sources}")
     private String root;
     @Override
-    public Session signUp(SignUp signUp, PasswordEncoder passwordEncoder) {
+    public UserResponse signUp(SignUp signUp, PasswordEncoder passwordEncoder) {
         User exsitUser = userRepository.getByEmailAndStatus(signUp.getEmail(), Status.ACTIVE);
 
         // Check valid params
@@ -69,28 +65,20 @@ public class UserServiceImpl implements UserService{
         User user = new User();
 
         user.setId(UniqueID.getUUID());
-        user.setAvatar(null);
         user.setFirstName(signUp.getFirstName());
         user.setLastName(signUp.getLastName());
         user.setEmail(signUp.getEmail());
+        user.setMajor(signUp.getMajor());
         user.setPasswordSalt(AppUtil.generateSalt());
         user.setPasswordHash(
                 passwordEncoder.encode(signUp.getPasswordHash().concat(user.getPasswordSalt())));
         user.setRole(signUp.getRole());
         user.setStatus(Status.IN_ACTIVE);
-        user.setCv(null);
-        user.setActiveCode(UniqueID.randomStringPin());
+        user.setActiveCode(UniqueID.generateUniqueToken(16));
 
         userRepository.save(user);
-
-        Session session = new Session();
-        session.setAccessToken(jwtTokenUtil.generateAccessToken(user));
-        session.setUserId(user.getId());
-        session.setCreatedDate(DateUtil.convertToUTC(new Date()));
-        session.setExpiryDate(DateUtil.addHoursToJavaUtilDate(new Date(), 24));
-
         emailService.confirmRegisterAccount(user);
-        return sessionRepository.save(session);
+        return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
     }
 
     @Override
@@ -104,23 +92,43 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User uploadAvatar(String id, MultipartFile file) throws IOException {
-        User user = userRepository.getById(id);
-        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+    public String forgotPassword(ForgotPasswordRequest forgotPassword) {
+        Validator.notNullAndNotEmptyParam(forgotPassword.getEmail(), RestAPIStatus.BAD_PARAMS, "");
+        Validator.notNullAndNotEmptyParam(forgotPassword.getType().toString(), RestAPIStatus.BAD_PARAMS, "");
 
-        return upload(user, "images/", file, false);
+        User user = userRepository.getByEmailAndStatus(forgotPassword.getEmail(), Status.ACTIVE);
+        Validator.notNull(user, RestAPIStatus.NOT_FOUND, "");
+
+        user.setActiveCode(UniqueID.generateUniqueToken(16));
+
+        userRepository.save(user);
+        emailService.resetPassword(user.getActiveCode(), forgotPassword.getType());
+        return "Successfully!";
     }
 
     @Override
-    public User uploadCV(String id, MultipartFile file) throws IOException {
-        User user = userRepository.getById(id);
-        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+    public UserResponse resetPassword(
+            String resetCode,
+            ResetPasswordRequest resetPassword,
+            PasswordEncoder passwordEncoder
+    ) {
+        User user = userRepository.getByActiveCodeAndStatus(resetCode, Status.ACTIVE);
+        Validator.notNull(user, RestAPIStatus.NOT_FOUND, "");
+        Validator.mustEquals(resetPassword.getPasswordHash(), resetPassword.getConfirmPassword(),
+                RestAPIStatus.BAD_REQUEST, "Password and confirm password not match");
 
-        return upload(user, "cv/", file, true);
+        user.setPasswordHash(
+                passwordEncoder.encode(resetPassword.getPasswordHash().concat(user.getPasswordSalt())));
+
+        return new UserResponse();
     }
 
     @Override
-    public User changePassword(String token, ChangePassword changePassword, PasswordEncoder passwordEncoder) {
+    public UserResponse changePassword(
+            String token,
+            ChangePassword changePassword,
+            PasswordEncoder passwordEncoder
+    ) {
         User user = userRepository.getByAccessToken(token);
         Validator.notNull(user, RestAPIStatus.NOT_FOUND, "");
         Validator.mustEquals(changePassword.getNewPassword(), changePassword.getConfirmNewPassword(),
@@ -135,11 +143,45 @@ public class UserServiceImpl implements UserService{
         }
 
         user.setPasswordHash(passwordEncoder.encode(changePassword.getNewPassword().concat(user.getPasswordSalt())));
-        return userRepository.save(user);
+        return new UserResponse(
+                userRepository.save(user),
+                AppUtil.getUrlUser(user, false),
+                AppUtil.getUrlUser(user, true)
+        );
     }
 
     @Override
-    public CandidateResponse getCandidate(String id) throws IOException {
+    public UserResponse uploadAvatar(String id, MultipartFile file) throws IOException {
+        User user = userRepository.getById(id);
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+
+        user = upload(user, "images/", file, false);
+        return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
+    }
+
+    @Override
+    public Page<UserResponse> getAllByRole(int pageNumber, int pageSize, UserRole role) {
+        PageRequest pageRequest = PageRequest.of(pageNumber - 1, pageSize);
+        return userRepository.getAllByRole(role, pageRequest);
+    }
+
+    @Override
+    public UserResponse uploadCV(String id, MultipartFile file) throws IOException {
+        User user = userRepository.getById(id);
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+
+        user = upload(user, "cv/", file, false);
+        return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
+    }
+
+    @Override
+    public String downLoadCv(String id) {
+        User user = userRepository.getById(id);
+        return user.getCv();
+    }
+
+    @Override
+    public UserResponse getCandidate(String id) throws IOException {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
@@ -151,7 +193,8 @@ public class UserServiceImpl implements UserService{
             List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
             workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
         }
-        return new CandidateResponse(user, getUrl(id, false), getUrl(id, true), workHistoryResponses, educations);
+        return new UserResponse(user, AppUtil.getUrlUser(user, false),
+                AppUtil.getUrlUser(user, true), workHistoryResponses, educations);
     }
 
     @Override
@@ -163,25 +206,7 @@ public class UserServiceImpl implements UserService{
         return "Delete successfully!";
     }
 
-    private String getUrl(String id, boolean isCV) throws IOException{
-        User user = userRepository.getById(id);
-        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
-        if (!isCV && Validator.isValidParam(user.getAvatar()))
-            return ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/static/images/")
-                    .path(user.getAvatar())
-                    .toUriString();
 
-        if (isCV && Validator.isValidParam(user.getCv()))
-            return ServletUriComponentsBuilder
-                    .fromCurrentContextPath()
-                    .path("/cv/")
-                    .path(user.getCv())
-                    .toUriString();
-
-        return "";
-    }
 
     private User upload(User user, String path, MultipartFile file, boolean isCv) throws IOException{
         // File name

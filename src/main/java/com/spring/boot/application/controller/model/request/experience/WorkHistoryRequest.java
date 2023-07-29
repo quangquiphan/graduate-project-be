@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
-public class AddWorkHistory {
+public class WorkHistoryRequest {
     private String companyName;
     private Date fromDate;
     private Date toDate;
@@ -20,5 +20,5 @@ public class AddWorkHistory {
     private String description;
     private String userId;
 
-    private List<AddProject> projects;
+    private List<ProjectRequest> projects;
 }

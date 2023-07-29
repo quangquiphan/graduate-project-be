@@ -4,10 +4,7 @@ import com.spring.boot.application.common.AbstractBaseController;
 import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
-import com.spring.boot.application.controller.model.request.experience.AddWorkHistory;
 import com.spring.boot.application.controller.model.request.user.SignUp;
-import com.spring.boot.application.controller.model.request.user.SubmitProfile;
-import com.spring.boot.application.services.experience.WorkHistoryService;
 import com.spring.boot.application.services.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.MediaType;
@@ -51,8 +48,8 @@ public class UserController extends AbstractBaseController {
 
     @Operation(summary = "uploadAvatar")
     @AuthorizeValidator(
-            {UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY,
-                    UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
+            {UserRole.USER, UserRole.ADMIN, UserRole.COMPANY_ADMIN,
+                    UserRole.COMPANY_MEMBER, UserRole.COMPANY_ADMIN_MEMBER})
     @RequestMapping(
             path = "/upload-avatar/{id}",
             method = RequestMethod.PUT,
@@ -67,8 +64,8 @@ public class UserController extends AbstractBaseController {
 
     @Operation(summary = "uploadCV")
     @AuthorizeValidator(
-            {UserRole.USER, UserRole.ADMIN, UserRole.ADMIN_COMPANY,
-                    UserRole.COMPANY_MEMBER, UserRole.ADMIN_COMPANY_MEMBER})
+            {UserRole.USER, UserRole.ADMIN, UserRole.COMPANY_ADMIN,
+                    UserRole.COMPANY_MEMBER, UserRole.COMPANY_ADMIN_MEMBER})
     @RequestMapping(
             path = "/upload-cv/{id}",
             method = RequestMethod.PUT,
