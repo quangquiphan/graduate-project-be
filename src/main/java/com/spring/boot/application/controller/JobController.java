@@ -1,7 +1,6 @@
 package com.spring.boot.application.controller;
 
 import com.spring.boot.application.common.AbstractBaseController;
-import com.spring.boot.application.common.utils.AppUtil;
 import com.spring.boot.application.common.utils.RestAPIResponse;
 import com.spring.boot.application.controller.model.request.company.JobRequest;
 import com.spring.boot.application.controller.model.response.PagingResponse;
@@ -28,7 +27,7 @@ public class JobController extends AbstractBaseController {
     }
 
 
-    @Operation(summary = "getJobs")
+    @Operation(summary = "getJobsByCompanyId")
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getJobs(
             @RequestParam String companyId,
@@ -36,6 +35,28 @@ public class JobController extends AbstractBaseController {
             @RequestParam(defaultValue = "10") int pageSize
     ){
         return responseUtil.successResponse(
-                new PagingResponse(jobService.getPageJob(companyId, pageNumber, pageSize), jobService.getJobs(companyId)));
+                new PagingResponse(jobService.getPageJobByCompanyId(companyId, pageNumber, pageSize),
+                        jobService.getJobsByCompanyId(companyId)));
+    }
+
+
+    @Operation(summary = "getJobsByCompanyId")
+    @RequestMapping(path = "/all", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> getAllJobs(
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ){
+        return responseUtil.successResponse(
+                new PagingResponse(jobService.getPageAllJobs(pageNumber, pageSize),
+                        jobService.getAllJobs()));
+    }
+
+
+    @Operation(summary = "getJobsByCompanyId")
+    @RequestMapping(path = "/search", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> searchJobs(
+            @RequestParam String searchKey
+            ){
+        return responseUtil.successResponse(jobService.searchJobs(searchKey));
     }
 }

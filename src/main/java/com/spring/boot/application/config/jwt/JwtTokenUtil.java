@@ -50,7 +50,7 @@ public class JwtTokenUtil {
                 .getBody();
         User user = userRepository.getById(claims.getIssuer());
 
-        if (!user.getCompanyId().isEmpty()) {
+        if (Validator.isValidParam(user.getCompanyId())) {
             Company company = companyRepository.getById(user.getCompanyId());
             Validator.notNull(company, RestAPIStatus.NOT_FOUND, "");
             try {

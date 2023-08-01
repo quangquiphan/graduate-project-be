@@ -4,7 +4,9 @@ import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.controller.model.request.auth.ChangePassword;
 import com.spring.boot.application.controller.model.request.auth.ForgotPasswordRequest;
 import com.spring.boot.application.controller.model.request.auth.ResetPasswordRequest;
+import com.spring.boot.application.controller.model.request.user.ApplyJob;
 import com.spring.boot.application.controller.model.request.user.SignUp;
+import com.spring.boot.application.controller.model.request.user.SubmitProfile;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,6 +36,10 @@ public interface UserService {
     String downLoadCv(String id);
 
     UserResponse getCandidate(String id) throws IOException;
+
+    UserResponse updateProfile(String id, SubmitProfile profile);
+
+    UserResponse apllyJob(ApplyJob applyJob);
 
     String deleteUser(String id);
 }

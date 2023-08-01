@@ -41,6 +41,28 @@ public class UserResponse {
     private List<WorkHistoryResponse> workHistories;
     private List<Education> educations;
 
+    public UserResponse(User user) {
+        this.id = user.getId();
+        this.avatar = user.getAvatar();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.dateOFBirth = user.getDateOfBirth();
+        this.gender = user.getGender();
+        this.phoneNumber = user.getPhoneNumber();
+        this.email = user.getEmail();
+        this.address = user.getAddress();
+        this.yearExperience = user.getYearExperience();
+        this.cv = user.getCv();
+        this.role = user.getRole();
+        this.summary = user.getSummary();
+        this.position = user.getPosition();
+        this.major = user.getMajor();
+        this.link = user.getLink();
+        this.status = user.getStatus();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }
+
     public UserResponse(User user, String url, String urlCV) {
         this.id = user.getId();
         this.avatar = url;
@@ -53,6 +75,7 @@ public class UserResponse {
         this.address = user.getAddress();
         this.yearExperience = user.getYearExperience();
         this.cv = urlCV;
+        this.role = user.getRole();
         this.summary = user.getSummary();
         this.position = user.getPosition();
         this.major = user.getMajor();
@@ -80,6 +103,7 @@ public class UserResponse {
         this.position = user.getPosition();
         this.major = user.getMajor();
         this.link = user.getLink();
+        this.role = user.getRole();
         this.status = user.getStatus();
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();

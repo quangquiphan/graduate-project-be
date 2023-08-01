@@ -21,6 +21,7 @@ public interface UserRepository extends JpaRepository<User, String> {
                  + " WHERE s.accessToken =: token")
     User getByAccessToken(@Param("token") String token);
 
-    @Query(value = "SELECT u FROM User u WHERE u.role=:role")
+    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
+                   " FROM User u where u.role =:role")
     Page<UserResponse> getAllByRole(@Param("role") UserRole role, Pageable pageable);
 }

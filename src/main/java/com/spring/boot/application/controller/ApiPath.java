@@ -20,4 +20,5 @@ public interface ApiPath {
     String COMPANY_APIs = BASE_API + "/company";
 
     String JOB_APIs = BASE_API + "/job";
+    String NOTIFICATION_APIs = BASE_API + "/notification";
 }

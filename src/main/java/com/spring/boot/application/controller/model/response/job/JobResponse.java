@@ -26,13 +26,16 @@ public class JobResponse {
     private String categoryJob;
     private String expiryDate;
     private Date createdDate;
+    private String companyId;
 
     List<SkillJobResponse> skills;
     List<LangJobResponse> languages;
 
 
-    public JobResponse(Job j, String url, String companyName, List<SkillJobResponse> sk, List<LangJobResponse> l) {
+    public JobResponse(Job j, String url, String companyName, String companyId,
+                       List<SkillJobResponse> sk, List<LangJobResponse> l) {
         this.id = j.getId();
+        this.companyId = companyId;
         this.companyAvatar = url;
         this.companyName = companyName;
         this.jobName = j.getJobName();
@@ -62,5 +65,21 @@ public class JobResponse {
         this.expiryDate = j.getExpiryDate();
         this.companyName = c.getCompanyName();
         this.companyAvatar = c.getAvatar();
+    }
+
+    public JobResponse(JobResponse j, String avatar) {
+        this.id = j.getId();
+        this.companyId = j.getCompanyId();
+        this.jobName = j.getJobName();
+        this.jobPosition = j.getJobPosition();
+        this.description = j.getDescription();
+        this.required = j.getRequired();
+        this.benefited = j.getBenefited();
+        this.salary = j.getSalary();
+        this.city = j.getCity();
+        this.createdDate = j.getCreatedDate();
+        this.expiryDate = j.getExpiryDate();
+        this.companyName = j.getCompanyName();
+        this.companyAvatar = avatar;
     }
 }

@@ -1,5 +1,6 @@
 package com.spring.boot.application.common.utils;
 
+import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.exceptions.ApplicationException;
 
 import java.util.List;
@@ -71,6 +72,13 @@ public class Validator {
         }
     }
 
+    public static boolean mustEquals(Status str1, Status status) {
+        if (!str1.equals(status)) {
+            return false;
+        }
+
+        return true;
+    }
 
     public static void mustEquals(String str1, String str2, RestAPIStatus RestAPIStatus, String message) {
         if (!str1.equals(str2)) {
@@ -106,6 +114,12 @@ public class Validator {
     }
 
     public static boolean isValidParam(String param) {
+        if ("".equals(param) || param == null)
+            return false;
+        return true;
+    }
+
+    public static boolean isValidParam(Status param) {
         if ("".equals(param) || param == null)
             return false;
         return true;

@@ -4,7 +4,13 @@ import com.spring.boot.application.common.AbstractBaseController;
 import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
+import com.spring.boot.application.common.utils.RestAPIStatus;
+import com.spring.boot.application.common.utils.Validator;
+import com.spring.boot.application.controller.model.request.user.ApplyJob;
 import com.spring.boot.application.controller.model.request.user.SignUp;
+import com.spring.boot.application.controller.model.request.user.SubmitProfile;
+import com.spring.boot.application.controller.model.response.user.UserResponse;
+import com.spring.boot.application.services.notification.NotificationService;
 import com.spring.boot.application.services.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.MediaType;
@@ -20,13 +26,16 @@ import java.io.IOException;
 public class UserController extends AbstractBaseController {
 
     final private UserService userService;
+    final private NotificationService notificationService;
     final PasswordEncoder passwordEncoder;
 
     public UserController(
             UserService userService,
+            NotificationService notificationService,
             PasswordEncoder passwordEncoder
     ) {
         this.userService = userService;
+        this.notificationService = notificationService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -34,7 +43,7 @@ public class UserController extends AbstractBaseController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<RestAPIResponse> signUp(
             @RequestBody SignUp signUp
-            ) {
+    ) {
         return responseUtil.successResponse(userService.signUp(signUp, passwordEncoder));
     }
 
@@ -58,7 +67,7 @@ public class UserController extends AbstractBaseController {
     public ResponseEntity<RestAPIResponse> uploadAvatar(
             @PathVariable String id,
             @RequestPart("avatar") MultipartFile file
-            ) throws IOException {
+    ) throws IOException {
         return responseUtil.successResponse(userService.uploadAvatar(id, file));
     }
 
@@ -76,6 +85,37 @@ public class UserController extends AbstractBaseController {
             @RequestPart("CV") MultipartFile file
     ) throws IOException {
         return responseUtil.successResponse(userService.uploadCV(id, file));
+    }
+
+    @Operation(summary = "updateProfile")
+    @AuthorizeValidator(
+            {UserRole.USER, UserRole.ADMIN, UserRole.COMPANY_ADMIN,
+                    UserRole.COMPANY_MEMBER, UserRole.COMPANY_ADMIN_MEMBER})
+    @RequestMapping(
+            path = "/{id}",
+            method = RequestMethod.PUT
+    )
+    public ResponseEntity<RestAPIResponse> updateProfile(
+            @PathVariable String id,
+            @RequestBody SubmitProfile submitProfile
+    ) {
+        return responseUtil.successResponse(userService.updateProfile(id, submitProfile));
+    }
+
+    @Operation(summary = "applyJob")
+    @AuthorizeValidator(
+            {UserRole.USER, UserRole.ADMIN})
+    @RequestMapping(
+            path = "/apply",
+            method = RequestMethod.POST
+    )
+    public ResponseEntity<RestAPIResponse> applyJob(
+            @RequestBody ApplyJob applyJob
+    ) {
+        UserResponse user = userService.apllyJob(applyJob);
+        Validator.notNull(user, RestAPIStatus.BAD_PARAMS, "");
+        notificationService.addNotification(applyJob.getUserId(), applyJob.getJobId(), "APPLIED_JOB");
+        return responseUtil.successResponse(user);
     }
 
     @Operation(summary = "deleteUser")
