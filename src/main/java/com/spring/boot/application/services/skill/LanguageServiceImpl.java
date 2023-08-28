@@ -6,6 +6,8 @@ import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.request.skill.LanguageRequest;
 import com.spring.boot.application.entity.Language;
 import com.spring.boot.application.repositories.LanguageRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +33,14 @@ public class LanguageServiceImpl implements LanguageService{
     }
 
     @Override
+    public Language getLang(String id) {
+        Language language = languageRepository.getById(id);
+        Validator.notNull(language, RestAPIStatus.NOT_FOUND, "");
+
+        return language;
+    }
+
+    @Override
     public Language updateLanguage(String id, LanguageRequest language) {
         Language l = languageRepository.getById(id);
         Validator.notNullAndNotEmpty(l, RestAPIStatus.NOT_FOUND, "");
@@ -46,6 +56,21 @@ public class LanguageServiceImpl implements LanguageService{
     @Override
     public List<Language> getAllLanguage() {
         return languageRepository.getAll();
+    }
+
+    @Override
+    public Page<Language> getPageLanguage(int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        return languageRepository.getPageLang(request);
+    }
+
+    @Override
+    public Page<Language> searchLanguage(String keyword, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        if (Validator.isValidParam(keyword)) {
+            return languageRepository.getPageLang(keyword, request);
+        }
+        return languageRepository.getPageLang(request);
     }
 
     @Override

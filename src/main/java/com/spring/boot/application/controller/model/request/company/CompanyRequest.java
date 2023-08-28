@@ -9,10 +9,11 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class CompanyRequest {
-    private String companyName;
     private String email;
+    private String companyName;
     private String phoneNumber;
     private String overview;
     private String size;
     private String website;
+    private String address;
 }

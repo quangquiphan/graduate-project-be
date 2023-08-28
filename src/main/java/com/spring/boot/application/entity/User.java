@@ -7,10 +7,7 @@ import com.spring.boot.application.common.enums.Gender;
 import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.enums.YearExperience;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -18,6 +15,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@Getter
+@Setter
 @Entity
 @ToString
 @NoArgsConstructor

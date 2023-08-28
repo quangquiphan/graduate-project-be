@@ -29,9 +29,6 @@ public class Company extends BaseEntity implements Serializable {
     @Column(name = "avatar")
     private String avatar;
 
-    @Column(name = "background")
-    private String background;
-
     @Column(name = "company_name")
     private String companyName;
 

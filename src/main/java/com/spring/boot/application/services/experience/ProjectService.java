@@ -4,6 +4,7 @@ import com.spring.boot.application.controller.model.request.experience.ProjectRe
 import com.spring.boot.application.entity.Project;
 
 public interface ProjectService {
+    Project addProject(ProjectRequest request);
     Project getProject(String id);
     Project updateProject(String id, ProjectRequest project);
     String deleteProject(String id);

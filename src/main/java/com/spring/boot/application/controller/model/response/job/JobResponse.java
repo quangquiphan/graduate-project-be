@@ -24,9 +24,10 @@ public class JobResponse {
     private String salary;
     private String city;
     private String categoryJob;
-    private String expiryDate;
+    private Date expiryDate;
     private Date createdDate;
     private String companyId;
+    private String address;
 
     List<SkillJobResponse> skills;
     List<LangJobResponse> languages;
@@ -40,11 +41,13 @@ public class JobResponse {
         this.companyName = companyName;
         this.jobName = j.getJobName();
         this.jobPosition = j.getJobPosition();
+        this.categoryJob = j.getCategoryJob();
         this.description = j.getDescription();
         this.required = j.getRequired();
         this.benefited = j.getBenefited();
         this.salary = j.getSalary();
         this.city = j.getCity();
+        this.address = j.getAddress();
         this.createdDate = j.getCreatedDate();
         this.expiryDate = j.getExpiryDate();
         this.skills = sk;
@@ -55,12 +58,14 @@ public class JobResponse {
     public JobResponse(Job j, Company c) {
         this.id = j.getId();
         this.jobName = j.getJobName();
+        this.categoryJob = j.getCategoryJob();
         this.jobPosition = j.getJobPosition();
         this.description = j.getDescription();
         this.required = j.getRequired();
         this.benefited = j.getBenefited();
         this.salary = j.getSalary();
         this.city = j.getCity();
+        this.address = j.getAddress();
         this.createdDate = j.getCreatedDate();
         this.expiryDate = j.getExpiryDate();
         this.companyName = c.getCompanyName();
@@ -72,11 +77,13 @@ public class JobResponse {
         this.companyId = j.getCompanyId();
         this.jobName = j.getJobName();
         this.jobPosition = j.getJobPosition();
+        this.categoryJob = j.getCategoryJob();
         this.description = j.getDescription();
         this.required = j.getRequired();
         this.benefited = j.getBenefited();
         this.salary = j.getSalary();
         this.city = j.getCity();
+        this.address = j.getAddress();
         this.createdDate = j.getCreatedDate();
         this.expiryDate = j.getExpiryDate();
         this.companyName = j.getCompanyName();

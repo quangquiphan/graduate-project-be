@@ -24,7 +24,7 @@ public class JobRequest {
     private String address;
     private String salary;
     private String city;
-    private String expiryDate;
+    private Date expiryDate;
     private String categoryJob;
     private String companyId;
 }

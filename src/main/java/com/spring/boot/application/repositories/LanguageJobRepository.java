@@ -11,8 +11,13 @@ import java.util.List;
 
 @Repository
 public interface LanguageJobRepository extends JpaRepository<LanguageJob, String> {
+    LanguageJob getById(String id);
     @Query(value = " SELECT new  com.spring.boot.application.controller.model.response.job.LangJobResponse(lj, l)"
             + " FROM LanguageJob lj, Language l"
             + " WHERE lj.languageId = l.id AND lj.jobId=:jobId")
     List<LangJobResponse> getAllByJobId(@Param("jobId") String jobId);
+    List<LanguageJob> findAllByJobId(String jobId);
+    @Query(value = " SELECT lj FROM LanguageJob lj " +
+            " WHERE lj.languageId =:languageId AND lj.jobId =:jobId")
+    LanguageJob getByLanguageIdAndJobId(@Param("languageId") String languageId, @Param("jobId") String jobId);
 }

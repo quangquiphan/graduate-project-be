@@ -1,5 +1,6 @@
 package com.spring.boot.application.services.notification;
 
+import com.spring.boot.application.common.enums.NotificationFilter;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
@@ -70,24 +71,16 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public List<NotificationResponse> getAllNotificationByCompanyId(String companyId) {
-        List<Notification> notifications = notificationRepository.getAllByCompanyId(companyId);
-
-        List<NotificationResponse> notificationResponses = new ArrayList<>();
-
-        for (int i = 0; i < notifications.size(); i++) {
-            Job job = jobRepository.getById(notifications.get(i).getJobId());
-            User user = userRepository.getById(notifications.get(i).getUserId());
-            notificationResponses.add(new NotificationResponse(user, job, notifications.get(i)));
-        }
-
-        return notificationResponses;
-    }
-
-    @Override
-    public Page<Notification> getAllNotificationByCompanyId(String companyId,
+    public Page<NotificationResponse> getAllNotificationByCompanyId(String companyId, NotificationFilter filter,
                                                             int pageNumber, int pageSize) {
         PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
-        return notificationRepository.getAllByCompanyId(companyId, request);
+        if (filter.equals(NotificationFilter.ALL)) {
+            return notificationRepository.getAllByCompanyId(companyId, request);
+        }
+
+        boolean read = false;
+
+        read = filter.equals(NotificationFilter.READ);
+        return notificationRepository.getAllByCompanyId(companyId, read, request);
     }
 }

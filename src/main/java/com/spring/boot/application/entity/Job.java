@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @Entity
@@ -33,13 +34,13 @@ public class Job extends BaseEntity implements Serializable {
     @Column(name = "job_position")
     private String jobPosition;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "required")
+    @Column(name = "required", columnDefinition = "TEXT")
     private String required;
 
-    @Column(name = "benefited")
+    @Column(name = "benefited", columnDefinition = "TEXT")
     private String benefited;
 
     @Column(name = "salary")
@@ -48,11 +49,14 @@ public class Job extends BaseEntity implements Serializable {
     @Column(name = "city")
     private String city;
 
+    @Column(name = "address")
+    private String address;
+
     @Column(name = "category_job")
     private String categoryJob;
 
     @Column(name = "expiry_date")
-    private String expiryDate;
+    private Date expiryDate;
 
     @Column(name = "company_id")
     private String companyId;

@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class UserLangRequest {
+    private String id;
     private String langId;
     private Status status;
 }

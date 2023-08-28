@@ -6,6 +6,8 @@ import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.request.skill.SkillRequest;
 import com.spring.boot.application.entity.Skill;
 import com.spring.boot.application.repositories.SkillRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +44,20 @@ public class SkillServiceImpl implements SkillService{
     @Override
     public List<Skill> getAllSkill() {
         return skillRepository.findAll();
+    }
+
+    @Override
+    public Page<Skill> getPageSkill(int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        return skillRepository.getPageSkill(request);
+    }
+
+    @Override
+    public Page<Skill> getPageSkill(String keyword, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber -1 , pageSize);
+        if (Validator.isValidParam(keyword))
+            return skillRepository.getPageSkill(keyword, request);
+        return skillRepository.getPageSkill(request);
     }
 
     @Override

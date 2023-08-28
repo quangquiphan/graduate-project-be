@@ -51,6 +51,19 @@ public class CompanyController extends AbstractBaseController {
         return responseUtil.successResponse(companyService.getCompany(id));
     }
 
+    @Operation(summary = "searchCompany")
+    @AuthorizeValidator(UserRole.ADMIN)
+    @RequestMapping(path = "/search", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> searchCompany(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) throws IOException {
+        return responseUtil.successResponse(
+                new PagingResponse(companyService.searchCompany(keyword, pageNumber, pageSize))
+        );
+    }
+
     @Operation(summary = "updateCompany")
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN})
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
@@ -70,17 +83,6 @@ public class CompanyController extends AbstractBaseController {
             @RequestParam(name = "avatar") MultipartFile avatar
             ) throws IOException {
         return responseUtil.successResponse(companyService.uploadAvatar(id, avatar));
-    }
-
-    @Operation(summary = "uploadBackground")
-    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN})
-    @RequestMapping(path = "/upload-background/{id}", method = RequestMethod.PUT,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<RestAPIResponse> uploadBGCompany(
-            @PathVariable(name = "id") String id,
-            @RequestParam(name = "background") MultipartFile background
-    ) throws IOException {
-        return responseUtil.successResponse(companyService.uploadBackground(id, background));
     }
 
     @Operation(summary = "deleteCompany")

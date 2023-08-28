@@ -88,7 +88,7 @@ public class Validator {
     }
 
     public static void notNullAndNotEmptyParam(String param, RestAPIStatus restAPIStatus, String message) {
-        if (param.isEmpty() && param.equals("")) {
+        if (param.isEmpty() || param.equals("")) {
             throw new ApplicationException(restAPIStatus, message);
         }
     }
@@ -102,7 +102,7 @@ public class Validator {
     }
 
     public static boolean isValidObject(List<?> list) {
-        if (list.isEmpty() || list.equals("") || list.size() == 0)
+        if (list.isEmpty() || list.equals("") || list.size() == 0 || list == null)
             return false;
         return true;
     }

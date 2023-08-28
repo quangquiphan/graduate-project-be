@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CompanyServiceImpl implements CompanyService{
+public class CompanyServiceImpl implements CompanyService {
     @Autowired
     private EmailService emailService;
     final private CompanyRepository companyRepository;
@@ -56,7 +56,6 @@ public class CompanyServiceImpl implements CompanyService{
         Validator.notNullAndNotEmptyParam(addCompany.getCompanyName(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(addCompany.getEmail(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(addCompany.getPhoneNumber(), RestAPIStatus.BAD_PARAMS, "");
-        Validator.validEmailAddressRegex(addCompany.getEmail(), RestAPIStatus.BAD_PARAMS, "");
 
         com.spring.boot.application.entity.Company existCompany = companyRepository.getByCompanyName(addCompany.getCompanyName());
 
@@ -80,15 +79,7 @@ public class CompanyServiceImpl implements CompanyService{
         Company company = companyRepository.getById(id);
         Validator.notNullAndNotEmpty(company, RestAPIStatus.NOT_FOUND, "");
 
-        return upload(company, "images/", file, true);
-    }
-
-    @Override
-    public Company uploadBackground(String id, MultipartFile file) throws IOException {
-        Company company = companyRepository.getById(id);
-        Validator.notNullAndNotEmpty(company, RestAPIStatus.NOT_FOUND, "");
-
-        return upload(company, "images/", file, false);
+        return upload(company, "images/", file);
     }
 
     @Override
@@ -96,16 +87,14 @@ public class CompanyServiceImpl implements CompanyService{
         Company company = companyRepository.getById(id);
         Validator.notNullAndNotEmpty(company, RestAPIStatus.NOT_FOUND, "");
         Validator.notNullAndNotEmptyParam(updateCompany.getCompanyName(), RestAPIStatus.BAD_PARAMS, "");
-        Validator.notNullAndNotEmptyParam(updateCompany.getEmail(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(updateCompany.getPhoneNumber(), RestAPIStatus.BAD_PARAMS, "");
-        Validator.validEmailAddressRegex(updateCompany.getEmail(), RestAPIStatus.BAD_PARAMS, "");
 
         company.setCompanyName(updateCompany.getCompanyName());
         company.setOverview(updateCompany.getOverview());
-        company.setEmail(updateCompany.getEmail());
         company.setPhoneNumber(updateCompany.getPhoneNumber());
         company.setSize(updateCompany.getSize());
         company.setWebsite(updateCompany.getWebsite());
+        company.setAddress(updateCompany.getAddress());
         return companyRepository.save(company);
     }
 
@@ -116,13 +105,21 @@ public class CompanyServiceImpl implements CompanyService{
     }
 
     @Override
+    public Page<Company> searchCompany(String keyword, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        if (Validator.isValidParam(keyword)) {
+            return companyRepository.getPageCompany(keyword, request);
+        }
+        return companyRepository.findAll(request);
+    }
+
+    @Override
     public List<CompanyResponse> getListCompany() throws IOException {
         List<CompanyResponse> companies = new ArrayList<>();
         List<Company> c = companyRepository.findAll();
         for (int i = 0; i < c.size(); i++) {
             companies.add(new CompanyResponse(c.get(i),
-                    AppUtil.getUrlCompany(c.get(i), true),
-                    AppUtil.getUrlCompany(c.get(i), false)));
+                    AppUtil.getUrlCompany(c.get(i))));
         }
         return companies;
     }
@@ -131,8 +128,7 @@ public class CompanyServiceImpl implements CompanyService{
     public CompanyResponse getCompany(String id) throws IOException {
         Company c = companyRepository.getById(id);
         Validator.notNull(c, RestAPIStatus.NOT_FOUND, "");
-        return new CompanyResponse(c, AppUtil.getUrlCompany(c, true),
-                AppUtil.getUrlCompany(c, false));
+        return new CompanyResponse(c, AppUtil.getUrlCompany(c));
     }
 
     @Override
@@ -144,7 +140,7 @@ public class CompanyServiceImpl implements CompanyService{
         return "Delete successfully!";
     }
 
-    private Company upload(Company company, String path, MultipartFile file, boolean isAvatar) throws IOException {
+    private Company upload(Company company, String path, MultipartFile file) throws IOException {
         // File name
         String name = company.getId() + "." + AppUtil.getFileExtension(file.getOriginalFilename());
 
@@ -161,12 +157,7 @@ public class CompanyServiceImpl implements CompanyService{
         // file copy
         Files.copy(file.getInputStream(), Paths.get(filePath));
 
-        if (isAvatar) {
-            company.setAvatar(name);
-            return companyRepository.save(company);
-        }
-
-        company.setBackground(name);
+        company.setAvatar(name);
         return companyRepository.save(company);
     }
 }

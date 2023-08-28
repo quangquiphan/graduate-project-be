@@ -22,21 +22,7 @@ public class EducationServicesImpl implements EducationService{
         Validator.notNullAndNotEmptyParam(addEducation.getSchoolName(), RestAPIStatus.BAD_PARAMS, "");
         Validator.notNullAndNotEmptyParam(addEducation.getCourse(), RestAPIStatus.BAD_PARAMS, "");
 
-        Education education = new Education();
-        education.setId(UniqueID.getUUID());
-        education.setSchoolName(addEducation.getSchoolName());
-        education.setMajor(addEducation.getCourse());
-        education.setFromDate(addEducation.getFromDate());
-        education.setCurrent(addEducation.isCurrent());
-
-        if (addEducation.isCurrent())
-            education.setToDate(null);
-        else education.setToDate(addEducation.getToDate());
-
-        education.setDescription(addEducation.getDescription());
-        education.setUserId(addEducation.getUserId());
-
-        return educationRepository.save(education);
+        return educationRepository.save(newEducation(addEducation));
     }
 
     @Override
@@ -53,19 +39,7 @@ public class EducationServicesImpl implements EducationService{
         Education education = educationRepository.getById(id);
         Validator.notNullAndNotEmpty(education, RestAPIStatus.NOT_FOUND, "");
 
-        education.setSchoolName(updateEducation.getSchoolName());
-        education.setMajor(updateEducation.getCourse());
-        education.setFromDate(updateEducation.getFromDate());
-        education.setCurrent(updateEducation.isCurrent());
-
-        if (updateEducation.isCurrent())
-            education.setToDate(null);
-        else education.setToDate(updateEducation.getToDate());
-
-        education.setDescription(updateEducation.getDescription());
-        education.setUserId(updateEducation.getUserId());
-
-        return educationRepository.save(education);
+        return educationRepository.save(upEducation(education, updateEducation));
     }
 
     @Override
@@ -75,5 +49,36 @@ public class EducationServicesImpl implements EducationService{
 
         educationRepository.delete(education);
         return "Delete successfully!";
+    }
+
+    private Education newEducation(EducationRequest addEducation) {
+        Education education = new Education();
+        education.setId(UniqueID.getUUID());
+        education.setSchoolName(addEducation.getSchoolName());
+        education.setMajor(addEducation.getCourse());
+        education.setFromDate(addEducation.getFromDate());
+        education.setCurrent(addEducation.isCurrent());
+
+        if (addEducation.isCurrent())
+            education.setToDate(null);
+        else education.setToDate(addEducation.getToDate());
+
+        education.setDescription(addEducation.getDescription());
+        education.setUserId(addEducation.getUserId());
+        return education;
+    }
+
+    private Education upEducation(Education education, EducationRequest addEducation) {
+        education.setSchoolName(addEducation.getSchoolName());
+        education.setMajor(addEducation.getCourse());
+        education.setFromDate(addEducation.getFromDate());
+        education.setCurrent(addEducation.isCurrent());
+
+        if (addEducation.isCurrent())
+            education.setToDate(null);
+        else education.setToDate(addEducation.getToDate());
+
+        education.setDescription(addEducation.getDescription());
+        return education;
     }
 }

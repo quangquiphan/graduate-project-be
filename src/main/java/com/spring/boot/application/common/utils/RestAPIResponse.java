@@ -1,6 +1,7 @@
 package com.spring.boot.application.common.utils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -9,6 +10,7 @@ import java.io.Serializable;
  * @author Digiex
  * @param <T> 
  */
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RestAPIResponse<T extends Object> implements Serializable {
 
@@ -45,24 +47,8 @@ public class RestAPIResponse<T extends Object> implements Serializable {
         this.description = description;
     }
 
-    public int getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public T getData() {
-        return data;
-    }
-
     public void setData(T data) {
         this.data = data;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public void setDescription(String description) {

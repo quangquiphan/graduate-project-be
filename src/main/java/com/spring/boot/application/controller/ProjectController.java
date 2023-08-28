@@ -19,6 +19,16 @@ public class ProjectController extends AbstractBaseController {
         this.projectService = projectService;
     }
 
+    @Operation(summary = "addProject")
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER,
+            UserRole.COMPANY_MEMBER, UserRole.USER})
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<RestAPIResponse> addProject(
+            @RequestBody ProjectRequest project
+    ) {
+        return responseUtil.successResponse(projectService.addProject(project));
+    }
+
     @Operation(summary = "getProject")
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER,
             UserRole.COMPANY_MEMBER, UserRole.USER})

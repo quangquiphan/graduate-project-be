@@ -3,6 +3,7 @@ package com.spring.boot.application.config.jwt;
 import com.spring.boot.application.common.auth.AuthUser;
 import com.spring.boot.application.common.exceptions.ApplicationException;
 import com.spring.boot.application.common.utils.AppUtil;
+import com.spring.boot.application.common.utils.Constant;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.response.company.AuthCompany;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Component
@@ -30,15 +33,27 @@ public class JwtTokenUtil {
     private CompanyRepository companyRepository;
 
     private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000;
+    SimpleDateFormat dateFormat = new SimpleDateFormat(Constant.API_FORMAT_DATE);
 
-    public String generateAccessToken(User user) {
-        return Jwts.builder()
-                .setIssuer(user.getId())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE_DURATION))
-                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
-                .compact();
+    public String generateAccessToken(User user, boolean keepLogin) {
+        Date expiry;
+        try {
+            if (keepLogin) {
+                expiry = dateFormat.parse("12/31/9999 00:00:00");
+            } else {
+                expiry = new Date(System.currentTimeMillis() + EXPIRE_DURATION);
+            }
 
+            return Jwts.builder()
+                    .setIssuer(user.getId())
+                    .setIssuedAt(new Date())
+                    .setExpiration(expiry)
+                    .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                    .compact();
+
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public AuthUser getUserIdFromJWT(String token) {
@@ -55,8 +70,7 @@ public class JwtTokenUtil {
             Validator.notNull(company, RestAPIStatus.NOT_FOUND, "");
             try {
                 return new AuthUser(user,
-                        new AuthCompany(company, AppUtil.getUrlCompany(company, true),
-                                AppUtil.getUrlCompany(company, false)));
+                        new AuthCompany(company, AppUtil.getUrlCompany(company)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

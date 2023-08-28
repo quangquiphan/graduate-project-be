@@ -5,6 +5,7 @@ import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
 import com.spring.boot.application.controller.model.request.skill.SkillRequest;
+import com.spring.boot.application.controller.model.response.PagingResponse;
 import com.spring.boot.application.services.skill.SkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class SkillController extends AbstractBaseController {
     }
 
     @Operation(summary = "addSkill")
-    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN})
+//    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN})
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<RestAPIResponse> addSkill(
             @RequestBody SkillRequest addSkill
@@ -29,7 +30,7 @@ public class SkillController extends AbstractBaseController {
     }
 
     @Operation(summary = "updateSkill")
-    @AuthorizeValidator(UserRole.ADMIN)
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER})
     @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<RestAPIResponse> updateSkill(
             @PathVariable(name = "id") String id,
@@ -50,6 +51,29 @@ public class SkillController extends AbstractBaseController {
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllSkill() {
         return responseUtil.successResponse(skillService.getAllSkill());
+    }
+
+    @Operation(summary = "getAllSkill")
+    @RequestMapping(path = "/pages", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> getAllSkill(
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return responseUtil.successResponse(
+                new PagingResponse(skillService.getPageSkill(pageNumber, pageSize))
+        );
+    }
+
+    @Operation(summary = "getAllSkill")
+    @RequestMapping(path = "/search", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> searchSkill(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return responseUtil.successResponse(
+                new PagingResponse(skillService.getPageSkill(keyword, pageNumber, pageSize))
+        );
     }
 
     @Operation(summary = "deleteSkill")

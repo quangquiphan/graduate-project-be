@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.USE_DEFAULTS)
 @JsonNaming(PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy.class)
 public class UserSkillRequest {
+    private String id;
     private String skillId;
     private Status status;
 }

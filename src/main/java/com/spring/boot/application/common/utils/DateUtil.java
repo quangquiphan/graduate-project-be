@@ -2,6 +2,7 @@ package com.spring.boot.application.common.utils;
 
 import com.spring.boot.application.common.exceptions.ApplicationException;
 import org.joda.time.DateTimeZone;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -482,4 +483,15 @@ public class DateUtil {
         return date;
     }
 
+
+    public static Date convertToShortDate(String dateStr) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(Constant.SHORT_DATE_FORMAT);
+        Date date;
+        try {
+            date = dateFormat.parse(dateStr);
+        } catch (ParseException e) {
+            throw new ApplicationException(RestAPIStatus.BAD_REQUEST, "Date Format must be " + dateFormat.toPattern());
+        }
+        return date;
+    }
 }

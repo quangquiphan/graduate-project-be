@@ -7,5 +7,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SessionRepository extends JpaRepository<Session, String> {
     Session getByAccessToken(String accessToken);
-    Session deleteByAccessToken(String token);
 }

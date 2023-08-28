@@ -53,6 +53,18 @@ public class CandidateController extends AbstractBaseController {
                 new PagingResponse(userService.getAllByRole(pageNumber, pageSize, UserRole.USER)));
     }
 
+    @Operation(summary = "searchCandidate")
+//    @AuthorizeValidator({UserRole.ADMIN})
+    @RequestMapping(path = "/search", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> searchCandidate(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        return responseUtil.successResponse(
+                new PagingResponse(userService.searchUser(keyword, pageNumber, pageSize)));
+    }
+
     @Operation(summary = "downloadCV")
     @RequestMapping(path = "/download/{id}", method = RequestMethod.GET)
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER,

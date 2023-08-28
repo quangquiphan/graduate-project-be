@@ -4,6 +4,7 @@ import com.spring.boot.application.common.AbstractBaseController;
 import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
+import com.spring.boot.application.controller.model.request.experience.UpdateWorkHistoryRequest;
 import com.spring.boot.application.controller.model.request.experience.WorkHistoryRequest;
 import com.spring.boot.application.services.experience.WorkHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,17 @@ public class WorkHistoryController extends AbstractBaseController {
             @RequestBody WorkHistoryRequest workHistory
     ) {
         return responseUtil.successResponse(workHistoryService.addWorkHistory(workHistory));
+    }
+
+    @Operation(summary = "updateWorkHistory")
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER,
+            UserRole.COMPANY_MEMBER, UserRole.USER})
+    @RequestMapping(path = "/{id}", method = RequestMethod.PUT)
+    public ResponseEntity<RestAPIResponse> updateWorkHistory(
+            @PathVariable String id,
+            @RequestBody UpdateWorkHistoryRequest workHistory
+    ) {
+        return responseUtil.successResponse(workHistoryService.updateWorkHistory(id, workHistory));
     }
 
     @Operation(summary = "getWorkHistory")

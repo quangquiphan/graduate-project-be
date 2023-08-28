@@ -14,32 +14,50 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, String> {
     Job getById(String id);
-    List<Job> getAllByCity(String city);
 
     @Query(value = " SELECT j FROM Job j " +
-                   " WHERE j.companyId=:companyId AND DATE_FORMAT(j.expiryDate, 'YYYY-MM-DD') - CURRENT_DATE >= 0" +
+                   " WHERE j.companyId =:companyId AND DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
                    " ORDER BY j.createdDate DESC "
     )
-    List<Job> getAllJobCompany(@Param("companyId") String companyId);
+    List<Job> getAllByCompanyId(@Param("companyId") String companyId);
 
     @Query(value = " SELECT j FROM Job j " +
-            " WHERE j.companyId=:companyId AND DATE_FORMAT(j.expiryDate, 'YYYY-MM-DD') - CURRENT_DATE >= 0" +
+            " WHERE j.companyId =:companyId AND DATEDIFF(j.expiryDate, CURRENT_DATE) > 0 AND j.categoryJob =:major" +
             " ORDER BY j.createdDate DESC "
     )
-    Page<Job> getAllJobCompany(@Param("companyId") String companyId, Pageable pageable);
+    List<Job> getAllByCompanyId(@Param("companyId") String companyId, @Param("major") String major);
+
+    @Query(value = " SELECT j FROM Job j " +
+            " WHERE j.companyId =:companyId AND DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
+            " ORDER BY j.createdDate DESC "
+    )
+    Page<Job> getAllByCompanyId(@Param("companyId") String companyId, Pageable pageable);
 
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
                    " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
-                   " WHERE DATE_FORMAT(j.expiryDate, 'YYYY-MM-DD') - CURRENT_DATE >= 0" +
-                   " AND CONCAT(j.jobName, j.jobPosition) LIKE %?1%" +
+                   " WHERE CONCAT(j.jobName, j.jobPosition, j.city) LIKE %?1% AND DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
                    " ORDER BY j.createdDate DESC "
     )
     List<JobResponse> getBySearchKey(@Param("search") String search);
 
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
             " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
-            " WHERE DATE_FORMAT(j.expiryDate, 'YYYY-MM-DD') - CURRENT_DATE >= 0" +
+            " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
             " ORDER BY j.createdDate DESC "
     )
     List<JobResponse> getAllJobs();
+
+    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
+            " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
+            " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
+            " ORDER BY j.createdDate DESC "
+    )
+    Page<JobResponse> getAllJobs(Pageable pageable);
+
+    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
+            " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
+            " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0 AND j.categoryJob =:major" +
+            " ORDER BY j.createdDate DESC "
+    )
+    Page<JobResponse> getAllJobsByMajor(@Param("major") String major, Pageable pageable);
 }

@@ -48,22 +48,16 @@ public class AppUtil {
         return "";
     }
 
-    public static String getUrlCompany(Company c, boolean isAvatar) throws IOException {
+    public static String getUrlCompany(Company c) throws IOException {
         Validator.notNullAndNotEmpty(c, RestAPIStatus.NOT_FOUND, "User not found");
-        String path = "";
-        if (!isAvatar && Validator.isValidParam(c.getAvatar()))
-            path = c.getBackground();
-
-        if (isAvatar && Validator.isValidParam(c.getBackground()))
-            path = c.getAvatar();
-        if (!Validator.isValidParam(path)) {
+        if (!Validator.isValidParam(c.getAvatar())){
             return "";
         }
 
         return ServletUriComponentsBuilder
                 .fromCurrentContextPath()
                 .path("/static/images/")
-                .path(path)
+                .path(c.getAvatar())
                 .toUriString();
     }
 

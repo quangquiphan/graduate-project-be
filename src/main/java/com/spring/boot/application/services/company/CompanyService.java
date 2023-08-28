@@ -12,9 +12,9 @@ import java.util.List;
 public interface CompanyService {
     Company addCompany(CompanyRequest addCompany);
     Company uploadAvatar(String id, MultipartFile file) throws IOException;
-    Company uploadBackground(String id, MultipartFile file) throws IOException;
     Company updateCompany(String id, CompanyRequest updateCompany);
     Page<Company> getAllCompany(int pageNumber, int pageSize);
+    Page<Company> searchCompany(String keyword, int pageNumber, int pageSize);
     List<CompanyResponse> getListCompany() throws IOException;
     CompanyResponse getCompany(String id) throws IOException;
     String deleteCompany(String id);

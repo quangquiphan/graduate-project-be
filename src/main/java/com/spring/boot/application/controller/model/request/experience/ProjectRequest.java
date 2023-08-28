@@ -17,4 +17,5 @@ public class ProjectRequest {
     private int teamSize;
     private String description;
     private String technology;
+    private String workHistoryId;
 }

@@ -15,4 +15,9 @@ public interface SkillJobRepository extends JpaRepository<SkillJob, String> {
                  + " FROM SkillJob sj, Skill s"
                  + " WHERE sj.skillId = s.id AND sj.jobId=:jobId")
     List<SkillJobResponse> getAllByJobId(@Param("jobId") String jobId);
+    @Query(value = " SELECT sk FROM SkillJob sk " +
+                   " WHERE sk.skillId =:skillId AND sk.jobId =:jobId")
+    SkillJob getBySkillIdAndJobId(@Param("skillId") String skillId, @Param("jobId") String jobId);
+    List<SkillJob> findAllByJobId(String jobId);
+    SkillJob getById(String id);
 }

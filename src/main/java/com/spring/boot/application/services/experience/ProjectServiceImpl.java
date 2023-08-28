@@ -1,6 +1,7 @@
 package com.spring.boot.application.services.experience;
 
 import com.spring.boot.application.common.utils.RestAPIStatus;
+import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.request.experience.ProjectRequest;
 import com.spring.boot.application.entity.Project;
@@ -19,6 +20,12 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
+    public Project addProject(ProjectRequest request) {
+        Validator.notNullAndNotEmptyParam(request.getProjectName(), RestAPIStatus.BAD_PARAMS, "");
+        return projectRepository.save(newProject(request));
+    }
+
+    @Override
     public Project getProject(String id) {
         Project p = projectRepository.getById(id);
         Validator.notNull(p, RestAPIStatus.NOT_FOUND, "");
@@ -31,14 +38,7 @@ public class ProjectServiceImpl implements ProjectService{
         Project p = projectRepository.getById(id);
         Validator.notNull(p, RestAPIStatus.NOT_FOUND, "");
 
-        p.setProjectName(project.getProjectName());
-        p.setDescription(project.getDescription());
-        p.setFromDate(project.getFromDate());
-        p.setToDate(project.getToDate());
-        p.setTechnology(project.getTechnology());
-        p.setTeamSize(project.getTeamSize());
-
-        return projectRepository.save(p);
+        return projectRepository.save(updateProject(p, project));
     }
 
     @Override
@@ -48,5 +48,31 @@ public class ProjectServiceImpl implements ProjectService{
 
         projectRepository.delete(p);
         return "Successfully!";
+    }
+
+    private Project newProject(ProjectRequest project) {
+        Project p = new Project();
+
+        p.setId(UniqueID.getUUID());
+        p.setProjectName(project.getProjectName());
+        p.setDescription(project.getDescription());
+        p.setFromDate(project.getFromDate());
+        p.setToDate(project.getToDate());
+        p.setTechnology(project.getTechnology());
+        p.setTeamSize(project.getTeamSize());
+        p.setWorkHistoryId(project.getWorkHistoryId());
+
+        return p;
+    }
+
+    private Project updateProject(Project p, ProjectRequest project) {
+        p.setProjectName(project.getProjectName());
+        p.setDescription(project.getDescription());
+        p.setFromDate(project.getFromDate());
+        p.setToDate(project.getToDate());
+        p.setTechnology(project.getTechnology());
+        p.setTeamSize(project.getTeamSize());
+
+        return p;
     }
 }

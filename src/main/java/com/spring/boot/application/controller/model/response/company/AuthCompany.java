@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 public class AuthCompany {
     private String id;
     private String avatar;
-    private String background;
     private String companyName;
     private String email;
     private String address;
@@ -20,10 +19,9 @@ public class AuthCompany {
     private String size;
     private String website;
 
-    public AuthCompany(Company company, String avatarUrl, String bgUrl) {
+    public AuthCompany(Company company, String avatarUrl) {
         this.id = company.getId();
         this.avatar = avatarUrl;
-        this.background = bgUrl;
         this.companyName = company.getCompanyName();
         this.email = company.getEmail();
         this.address =company.getAddress();

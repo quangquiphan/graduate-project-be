@@ -1,5 +1,7 @@
 package com.spring.boot.application.services.user;
 
+import com.spring.boot.application.common.enums.AccountType;
+import com.spring.boot.application.common.enums.JobStatus;
 import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.exceptions.ApplicationException;
@@ -7,15 +9,17 @@ import com.spring.boot.application.common.utils.*;
 import com.spring.boot.application.controller.model.request.auth.ChangePassword;
 import com.spring.boot.application.controller.model.request.auth.ForgotPasswordRequest;
 import com.spring.boot.application.controller.model.request.auth.ResetPasswordRequest;
+import com.spring.boot.application.controller.model.request.user.AddMember;
 import com.spring.boot.application.controller.model.request.user.ApplyJob;
 import com.spring.boot.application.controller.model.request.user.SignUp;
 import com.spring.boot.application.controller.model.request.user.SubmitProfile;
 import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
+import com.spring.boot.application.controller.model.response.skill.UserLangResponse;
+import com.spring.boot.application.controller.model.response.skill.UserSkillResponse;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
 import com.spring.boot.application.entity.*;
 import com.spring.boot.application.repositories.*;
 import com.spring.boot.application.services.mail.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,13 +31,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private EmailService emailService;
+    final private EmailService emailService;
     final private UserRepository userRepository;
     final private EducationRepository educationRepository;
     final private WorkHistoryRepository workHistoryRepository;
@@ -42,16 +47,21 @@ public class UserServiceImpl implements UserService {
     final private UserLangRepository userLangRepository;
     final private JobRepository jobRepository;
     final private UserJobRepository userJobRepository;
+    final private SkillRepository skillRepository;
+    final private LanguageRepository languageRepository;
 
     public UserServiceImpl(
-            UserRepository userRepository,
+            EmailService emailService, UserRepository userRepository,
             EducationRepository educationRepository,
             WorkHistoryRepository workHistoryRepository,
             ProjectRepository projectRepository,
             UserSkillRepository userSkillRepository,
             UserLangRepository userLangRepository,
             JobRepository jobRepository,
-            UserJobRepository userJobRepository) {
+            UserJobRepository userJobRepository,
+            SkillRepository skillRepository,
+            LanguageRepository languageRepository) {
+        this.emailService = emailService;
         this.userRepository = userRepository;
         this.educationRepository = educationRepository;
         this.workHistoryRepository = workHistoryRepository;
@@ -60,10 +70,14 @@ public class UserServiceImpl implements UserService {
         this.userLangRepository = userLangRepository;
         this.jobRepository = jobRepository;
         this.userJobRepository = userJobRepository;
+        this.skillRepository = skillRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Value("${project.sources}")
     private String root;
+
+    SimpleDateFormat dateFormat = new SimpleDateFormat(Constant.SHORT_DATE_FORMAT);
 
     @Override
     public UserResponse signUp(SignUp signUp, PasswordEncoder passwordEncoder) {
@@ -89,9 +103,35 @@ public class UserServiceImpl implements UserService {
         user.setRole(signUp.getRole());
         user.setStatus(Status.IN_ACTIVE);
         user.setActiveCode(UniqueID.generateUniqueToken(16));
+        user.setPhoneNumber(signUp.getPhoneNumber());
 
         userRepository.save(user);
         emailService.confirmRegisterAccount(user);
+        return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
+    }
+
+    @Override
+    public UserResponse addMember(AddMember member) {
+
+        User exsitUser = userRepository.getByEmailAndStatus(member.getEmail(), Status.ACTIVE);
+
+        // Check valid params
+        Validator.mustNull(exsitUser, RestAPIStatus.EXISTED, "User is exist");
+        Validator.notNullAndNotEmptyParam(member.getEmail(), RestAPIStatus.BAD_PARAMS, "Email not null");
+        Validator.validEmailAddressRegex(member.getEmail(), RestAPIStatus.BAD_PARAMS, "Email invalid");
+
+        User user = new User();
+
+        user.setId(UniqueID.getUUID());
+        user.setFirstName(member.getFirstName());
+        user.setLastName(member.getLastName());
+        user.setEmail(member.getEmail());
+        user.setRole(member.getRole());
+        user.setStatus(Status.ACTIVE);
+        user.setActiveCode(UniqueID.generateUniqueToken(16));
+
+        userRepository.save(user);
+        emailService.resetPassword(user.getActiveCode(), AccountType.COMPANY);
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
     }
 
@@ -133,7 +173,6 @@ public class UserServiceImpl implements UserService {
 
         user.setPasswordHash(
                 passwordEncoder.encode(resetPassword.getPasswordHash().concat(user.getPasswordSalt())));
-
         userRepository.save(user);
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
     }
@@ -171,6 +210,7 @@ public class UserServiceImpl implements UserService {
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
         user = upload(user, "images/", file, false);
+
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
     }
 
@@ -203,13 +243,30 @@ public class UserServiceImpl implements UserService {
         List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
         List<Education> educations = educationRepository.getAllByUserId(user.getId());
         List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(user.getId());
-
+        List<UserSkillResponse> skills = userSkillRepository.getAllByUserId(user.getId());
+        List<UserLangResponse> languages = userLangRepository.getAllByUserId(user.getId());
+        List<UserJob> userJobs = userJobRepository.getByUserId(user.getId());
         for (int i = 0; i < workHistories.size(); i++) {
             List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
             workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
         }
+
         return new UserResponse(user, AppUtil.getUrlUser(user, false),
-                AppUtil.getUrlUser(user, true), workHistoryResponses, educations);
+                AppUtil.getUrlUser(user, true), workHistoryResponses,
+                educations, skills, languages, userJobs);
+    }
+
+    @Override
+    public UserResponse updateMember(String id, AddMember member) {
+        User user = userRepository.getById(id);
+        Validator.notNull(user, RestAPIStatus.NOT_FOUND, "");
+
+        user.setLastName(member.getLastName());
+        user.setFirstName(member.getFirstName());
+        user.setEmail(member.getEmail());
+        user.setRole(member.getRole());
+        userRepository.save(user);
+        return new UserResponse(user);
     }
 
     @Override
@@ -219,7 +276,7 @@ public class UserServiceImpl implements UserService {
 
         user.setFirstName(profile.getFirstName());
         user.setLastName(profile.getLastName());
-        user.setDateOfBirth(profile.getDateOfBirth());
+        user.setDateOfBirth(DateUtil.convertToShortDate(profile.getDateOfBirth()));
         user.setGender(profile.getGender());
         user.setPhoneNumber(profile.getPhoneNumber());
         user.setPosition(profile.getPosition());
@@ -229,64 +286,71 @@ public class UserServiceImpl implements UserService {
         user.setAddress(profile.getAddress());
         user.setYearExperience(profile.getYearExperience());
 
-        List<UserSkill> skills = new ArrayList<>();
-        List<UserLang> langs = new ArrayList<>();
 
+        if (Validator.isValidObject(profile.getSkills())) {
+            List<UserSkill> skills = new ArrayList<>();
 
-        for (int i = 0; i < profile.getSkills().size(); i++) {
-            if (!Validator.isValidParam(profile.getSkills().get(i).getStatus())){
-                profile.getSkills().get(i).setStatus(Status.IN_ACTIVE);
+            for (int i = 0; i < profile.getSkills().size(); i++) {
+                if (!Validator.isValidParam(profile.getSkills().get(i).getStatus())){
+                    profile.getSkills().get(i).setStatus(Status.IN_ACTIVE);
+                }
+
+                UserSkill skill = userSkillRepository.getBySkillIdAndStatus(profile.getSkills().get(i).getSkillId(),
+                        Status.ACTIVE);
+
+                if (Validator.isValidParam(profile.getSkills().get(i).getId()) &&
+                        Validator.mustEquals(profile.getSkills().get(i).getStatus(), Status.IN_ACTIVE)) {
+                    userSkillRepository.delete(skill);
+                }
+
+                if (!Validator.isValidObject(skill)) {
+                    UserSkill s = new UserSkill();
+                    s.setId(UniqueID.getUUID());
+                    s.setUserId(user.getId());
+                    s.setSkillId(profile.getSkills().get(i).getSkillId());
+                    s.setStatus(profile.getSkills().get(i).getStatus());
+
+                    skills.add(s);
+                }
             }
-
-            UserSkill skill = userSkillRepository.getBySkillIdAndStatus(profile.getSkills().get(i).getSkillId(),
-                    Status.ACTIVE);
-
-            if (Validator.mustEquals(profile.getSkills().get(i).getStatus(), Status.IN_ACTIVE)) {
-                userSkillRepository.delete(skill);
-            }
-
-            if (!Validator.isValidObject(skill)) {
-                UserSkill s = new UserSkill();
-                s.setId(UniqueID.getUUID());
-                s.setUserId(user.getId());
-                s.setSkillId(profile.getSkills().get(i).getSkillId());
-                s.setStatus(profile.getSkills().get(i).getStatus());
-
-                skills.add(s);
-            }
+            userSkillRepository.saveAll(skills);
         }
 
-        for (int i = 0; i < profile.getLanguages().size(); i++) {
-            if (!Validator.isValidParam(profile.getLanguages().get(i).getStatus())){
-                profile.getLanguages().get(i).setStatus(Status.IN_ACTIVE);
+        if (Validator.isValidObject(profile.getLanguages())) {
+            List<UserLang> langs = new ArrayList<>();
+
+            for (int i = 0; i < profile.getLanguages().size(); i++) {
+                if (!Validator.isValidParam(profile.getLanguages().get(i).getStatus())) {
+                    profile.getLanguages().get(i).setStatus(Status.IN_ACTIVE);
+                }
+
+                UserLang lang = userLangRepository.getByLangIdAndStatus(profile.getLanguages().get(i).getLangId(),
+                        Status.ACTIVE);
+
+                if (Validator.isValidParam(profile.getLanguages().get(i).getId()) &&
+                        Validator.mustEquals(profile.getLanguages().get(i).getStatus(), Status.IN_ACTIVE)) {
+                    userLangRepository.delete(lang);
+                }
+
+                if (!Validator.isValidObject(lang)) {
+                    UserLang l = new UserLang();
+                    l.setId(UniqueID.getUUID());
+                    l.setUserId(user.getId());
+                    l.setLangId(profile.getLanguages().get(i).getLangId());
+                    l.setStatus(profile.getLanguages().get(i).getStatus());
+
+                    langs.add(l);
+                }
             }
-
-            UserLang lang = userLangRepository.getByLangIdAndStatus(profile.getSkills().get(i).getSkillId(),
-                    Status.ACTIVE);
-
-            if (Validator.mustEquals(profile.getLanguages().get(i).getStatus(), Status.IN_ACTIVE)) {
-                userLangRepository.delete(lang);
-            }
-
-            if (!Validator.isValidObject(lang)) {
-                UserLang l = new UserLang();
-                l.setId(UniqueID.getUUID());
-                l.setUserId(user.getId());
-                l.setLangId(profile.getLanguages().get(i).getLangId());
-                l.setStatus(profile.getLanguages().get(i).getStatus());
-
-                langs.add(l);
-            }
+            userLangRepository.saveAll(langs);
         }
 
         userRepository.save(user);
-        userLangRepository.saveAll(langs);
-        userSkillRepository.saveAll(skills);
         return new UserResponse(user);
     }
 
     @Override
-    public UserResponse apllyJob(ApplyJob applyJob) {
+    public UserResponse applyJob(ApplyJob applyJob) {
         User user = userRepository.getById(applyJob.getUserId());
         Validator.notNull(user, RestAPIStatus.NOT_FOUND, "");
 
@@ -297,23 +361,115 @@ public class UserServiceImpl implements UserService {
         userJob.setId(UniqueID.getUUID());
         userJob.setJobId(job.getId());
         userJob.setUserId(user.getId());
+        userJob.setStatus(applyJob.getStatus());
+
         userJobRepository.save(userJob);
         return new UserResponse(user);
     }
 
     @Override
-    public String deleteUser(String id) {
+    public Page<UserResponse> matchesCandidate(String major, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        return userRepository.getAllByMajor(major, request);
+    }
+
+    @Override
+    public Page<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        return userRepository.getAllByJobIdAndStatus(jobId, status, request);
+    }
+
+    @Override
+    public List<UserResponse> matchesCandidate(String major) {
+        List<UserResponse> userResponses = userRepository.getAllByMajor(major);
+        List<UserResponse> responses = new ArrayList<>();
+
+        for (int i = 0; i < userResponses.size(); i++) {
+            User usr = userRepository.getById(userResponses.get(i).getId());
+            List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
+            List<Education> educations = educationRepository.getAllByUserId(userResponses.get(i).getId());
+            List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(userResponses.get(i).getId());
+            List<Skill> skills = skillRepository.getAllByUserId(userResponses.get(i).getId());
+            List<Language> languages = languageRepository.getAllByUserId(userResponses.get(i).getId());
+
+            for (int j = 0; j < workHistories.size(); j++) {
+                List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
+                workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
+            }
+
+            responses.add(new UserResponse(userResponses.get(i), AppUtil.getUrlUser(usr, false),
+                    AppUtil.getUrlUser(usr, true), workHistoryResponses, educations, skills, languages));
+        }
+
+        return responses;
+    }
+
+    @Override
+    public List<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status) {
+        List<UserResponse> userResponses = userRepository.getAllByJobIdAndStatus(jobId, status);
+        List<UserResponse> responses = new ArrayList<>();
+
+        for (int i = 0; i < userResponses.size(); i++) {
+            User usr = userRepository.getById(userResponses.get(i).getId());
+            List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
+            List<Education> educations = educationRepository.getAllByUserId(userResponses.get(i).getId());
+            List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(userResponses.get(i).getId());
+            List<Skill> skills = skillRepository.getAllByUserId(userResponses.get(i).getId());
+            List<Language> languages = languageRepository.getAllByUserId(userResponses.get(i).getId());
+
+            for (int j = 0; j < workHistories.size(); j++) {
+                List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
+                workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
+            }
+
+            responses.add(new UserResponse(userResponses.get(i), AppUtil.getUrlUser(usr, false),
+                    AppUtil.getUrlUser(usr, true), workHistoryResponses, educations, skills, languages));
+        }
+        return responses;
+    }
+
+    @Override
+    public Page<UserResponse> searchUser(String keyword, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        if (Validator.isValidParam(keyword)){
+            return userRepository.searchCandidate(keyword, request);
+        }
+
+        return userRepository.getAllByRole(UserRole.USER, request);
+    }
+
+    @Override
+    public Page<UserResponse> getAccountCompany(String companyId, int pageNumber, int pageSize) {
+        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
+        return userRepository.getAllByCompanyId(companyId, request);
+    }
+
+    @Override
+    public List<UserResponse> getAccountCompany(String companyId) {
+        List<UserResponse> responses = new ArrayList<>();
+        List<User> accounts = userRepository.getAllByCompanyId(companyId);
+
+        for (int i = 0; i < accounts.size(); i++) {
+            User user = userRepository.getById(accounts.get(i).getId());
+            responses.add(new UserResponse(user, AppUtil.getUrlUser(user, false),
+                    AppUtil.getUrlUser(user, true)));
+        }
+        return responses;
+    }
+
+    @Override
+    public String deleteUser(String id, UserRole role) {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
 
-        userRepository.delete(user);
+        userRepository.delete(checkRole(user, role));
         return "Delete successfully!";
     }
 
 
     private User upload(User user, String path, MultipartFile file, boolean isCv) throws IOException {
         // File name
-        String name = user.getId() + "." + AppUtil.getFileExtension(file.getOriginalFilename());
+        String name = user.getId() + "-" + new Date().getTime() + "." + AppUtil.getFileExtension(file.getOriginalFilename());
 
         // Full path
         String filePath = root + path + name;
@@ -335,5 +491,34 @@ public class UserServiceImpl implements UserService {
 
         user.setAvatar(name);
         return userRepository.save(user);
+    }
+
+    private User checkRole(User u, UserRole role) {
+        switch (role) {
+            case ADMIN: {
+                break;
+            }
+
+            case COMPANY_ADMIN: {
+                if (u.getRole().equals(UserRole.ADMIN)) {
+                    throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+                }
+                break;
+            }
+
+            case COMPANY_ADMIN_MEMBER: {
+                if (u.getRole().equals(UserRole.ADMIN) || u.getRole().equals(UserRole.COMPANY_ADMIN)) {
+                    throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+                }
+                break;
+            }
+
+            case COMPANY_MEMBER:
+            case USER: {
+                throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+            }
+        }
+
+        return u;
     }
 }

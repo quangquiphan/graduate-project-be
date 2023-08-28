@@ -5,8 +5,7 @@ import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.enums.YearExperience;
 import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
-import com.spring.boot.application.entity.Education;
-import com.spring.boot.application.entity.User;
+import com.spring.boot.application.entity.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,7 @@ public class UserResponse {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private Date dateOFBirth;
+    private Date dateOfBirth;
     private Gender gender;
     private String summary;
     private String major;
@@ -40,13 +39,16 @@ public class UserResponse {
 
     private List<WorkHistoryResponse> workHistories;
     private List<Education> educations;
+    private List<?> skills;
+    private List<?> languages;
+    private List<?> jobsApplied;
 
     public UserResponse(User user) {
         this.id = user.getId();
         this.avatar = user.getAvatar();
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
-        this.dateOFBirth = user.getDateOfBirth();
+        this.dateOfBirth = user.getDateOfBirth();
         this.gender = user.getGender();
         this.phoneNumber = user.getPhoneNumber();
         this.email = user.getEmail();
@@ -68,7 +70,7 @@ public class UserResponse {
         this.avatar = url;
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
-        this.dateOFBirth = user.getDateOfBirth();
+        this.dateOfBirth = user.getDateOfBirth();
         this.gender = user.getGender();
         this.phoneNumber = user.getPhoneNumber();
         this.email = user.getEmail();
@@ -86,13 +88,16 @@ public class UserResponse {
     }
 
     public UserResponse(User user, String url, String urlCV,
-                        List<WorkHistoryResponse> workHistories, List<Education> educations
+                        List<WorkHistoryResponse> workHistories,
+                        List<Education> educations,
+                        List<?> skills,
+                        List<?> languages
     ) {
         this.id = user.getId();
         this.avatar = url;
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
-        this.dateOFBirth = user.getDateOfBirth();
+        this.dateOfBirth = user.getDateOfBirth();
         this.gender = user.getGender();
         this.phoneNumber = user.getPhoneNumber();
         this.email = user.getEmail();
@@ -109,5 +114,70 @@ public class UserResponse {
         this.updatedDate = user.getUpdatedDate();
         this.workHistories = workHistories;
         this.educations = educations;
+        this.skills = skills;
+        this.languages = languages;
+    }
+
+    public UserResponse(UserResponse user, String url, String urlCV,
+                        List<WorkHistoryResponse> workHistories,
+                        List<Education> educations,
+                        List<?> skills,
+                        List<?> languages
+    ) {
+        this.id = user.getId();
+        this.avatar = url;
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.dateOfBirth = user.getDateOfBirth();
+        this.gender = user.getGender();
+        this.phoneNumber = user.getPhoneNumber();
+        this.email = user.getEmail();
+        this.address = user.getAddress();
+        this.yearExperience = user.getYearExperience();
+        this.cv = urlCV;
+        this.summary = user.getSummary();
+        this.position = user.getPosition();
+        this.major = user.getMajor();
+        this.link = user.getLink();
+        this.role = user.getRole();
+        this.status = user.getStatus();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+        this.workHistories = workHistories;
+        this.educations = educations;
+        this.skills = skills;
+        this.languages = languages;
+    }
+    public UserResponse(User user, String url, String urlCV,
+                        List<WorkHistoryResponse> workHistories,
+                        List<Education> educations,
+                        List<?> skills,
+                        List<?> languages,
+                        List<UserJob> js
+    ) {
+        this.id = user.getId();
+        this.avatar = url;
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.dateOfBirth = user.getDateOfBirth();
+        this.gender = user.getGender();
+        this.phoneNumber = user.getPhoneNumber();
+        this.email = user.getEmail();
+        this.address = user.getAddress();
+        this.yearExperience = user.getYearExperience();
+        this.cv = urlCV;
+        this.summary = user.getSummary();
+        this.position = user.getPosition();
+        this.major = user.getMajor();
+        this.link = user.getLink();
+        this.role = user.getRole();
+        this.status = user.getStatus();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+        this.workHistories = workHistories;
+        this.educations = educations;
+        this.skills = skills;
+        this.languages = languages;
+        this.jobsApplied = js;
     }
 }

@@ -56,17 +56,18 @@ public class SessionServiceImpl implements SessionService {
         }
 
         Session session = new Session();
-        session.setAccessToken(jwtTokenUtil.generateAccessToken(user));
         session.setUserId(user.getId());
         session.setCreatedDate(DateUtil.convertToUTC(new Date()));
 
         if (signIn.isKeepLogin()) {
             try {
+                session.setAccessToken(jwtTokenUtil.generateAccessToken(user, true));
                 session.setExpiryDate(dateFormat.parse("12/31/9999 00:00:00"));
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         } else {
+            session.setAccessToken(jwtTokenUtil.generateAccessToken(user, false));
             session.setExpiryDate(DateUtil.addHoursToJavaUtilDate(new Date(), 24));
         }
         return sessionRepository.save(session);

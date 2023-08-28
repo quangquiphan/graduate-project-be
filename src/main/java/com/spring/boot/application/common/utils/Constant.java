@@ -5,6 +5,8 @@ public interface Constant {
 
     String DATE_FORMAT = "yyyy/MM/dd";
 
+    String SHORT_DATE_FORMAT = "yyyy-MM-dd";
+
     String API_FORMAT_DATE = "yyyy/MM/dd HH:mm:ss";
 
     int SALT_LENGTH = 34;
