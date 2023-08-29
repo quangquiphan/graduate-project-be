@@ -39,7 +39,7 @@ public class JwtTokenUtil {
         Date expiry;
         try {
             if (keepLogin) {
-                expiry = dateFormat.parse("12/31/9999 00:00:00");
+                expiry = dateFormat.parse("9999/12/31 00:00:00");
             } else {
                 expiry = new Date(System.currentTimeMillis() + EXPIRE_DURATION);
             }

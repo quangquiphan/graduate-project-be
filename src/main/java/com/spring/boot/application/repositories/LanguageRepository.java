@@ -22,6 +22,6 @@ public interface LanguageRepository extends JpaRepository<Language, String> {
     List<Language> getAll();
     @Query(value = " SELECT l FROM Language l WHERE l.language LIKE %?1%")
     Page<Language> getPageLang(String name, Pageable pageable);
-    @Query(value = " SELECT l FROM Language l")
+    @Query(value = " SELECT l FROM Language l ORDER BY l.language ASC")
     Page<Language> getPageLang(Pageable pageable);
 }

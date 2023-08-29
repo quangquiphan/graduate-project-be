@@ -42,27 +42,17 @@ public class UserJobController extends AbstractBaseController {
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
     @RequestMapping(path = "/applied", method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllCandidateApplied(
-            @RequestParam String jobId,
-            @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam String jobId
     ) {
-        return responseUtil.successResponse(
-                new PagingResponse(userService.getAllCandidateByJobId(jobId, JobStatus.APPLIED, pageNumber, pageSize),
-                        userService.getAllCandidateByJobId(jobId, JobStatus.APPLIED))
-        );
+        return responseUtil.successResponse(userJobService.getAllUserByJobIdAndJobStatus(jobId, JobStatus.APPLIED));
     }
 
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
     @RequestMapping(path = "/rejected", method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllCandidateRejected(
-            @RequestParam String jobId,
-            @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam String jobId
     ) {
-        return responseUtil.successResponse(
-                new PagingResponse(userService.getAllCandidateByJobId(jobId, JobStatus.REJECTED, pageNumber, pageSize),
-                        userService.getAllCandidateByJobId(jobId, JobStatus.REJECTED))
-        );
+        return responseUtil.successResponse(userJobService.getAllUserByJobIdAndJobStatus(jobId, JobStatus.REJECTED));
     }
 
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})

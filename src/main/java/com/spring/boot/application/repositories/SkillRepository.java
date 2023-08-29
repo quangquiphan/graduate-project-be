@@ -18,6 +18,6 @@ public interface SkillRepository extends JpaRepository<Skill, String> {
     List<Skill> getAllByUserId(@Param("userId") String userId);
     @Query(value = " SELECT s FROM Skill s WHERE s.skillName LIKE %?1%")
     Page<Skill> getPageSkill(String name, Pageable pageable);
-    @Query(value = " SELECT s FROM Skill s")
+    @Query(value = " SELECT s FROM Skill s ORDER BY s.skillName ASC")
     Page<Skill> getPageSkill(Pageable pageable);
 }

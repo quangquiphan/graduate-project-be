@@ -236,7 +236,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getCandidate(String id) throws IOException {
+    public UserResponse getCandidate(String id) {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
@@ -374,12 +374,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status, int pageNumber, int pageSize) {
-        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
-        return userRepository.getAllByJobIdAndStatus(jobId, status, request);
-    }
-
-    @Override
     public List<UserResponse> matchesCandidate(String major) {
         List<UserResponse> userResponses = userRepository.getAllByMajor(major);
         List<UserResponse> responses = new ArrayList<>();
@@ -401,30 +395,6 @@ public class UserServiceImpl implements UserService {
                     AppUtil.getUrlUser(usr, true), workHistoryResponses, educations, skills, languages));
         }
 
-        return responses;
-    }
-
-    @Override
-    public List<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status) {
-        List<UserResponse> userResponses = userRepository.getAllByJobIdAndStatus(jobId, status);
-        List<UserResponse> responses = new ArrayList<>();
-
-        for (int i = 0; i < userResponses.size(); i++) {
-            User usr = userRepository.getById(userResponses.get(i).getId());
-            List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
-            List<Education> educations = educationRepository.getAllByUserId(userResponses.get(i).getId());
-            List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(userResponses.get(i).getId());
-            List<Skill> skills = skillRepository.getAllByUserId(userResponses.get(i).getId());
-            List<Language> languages = languageRepository.getAllByUserId(userResponses.get(i).getId());
-
-            for (int j = 0; j < workHistories.size(); j++) {
-                List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
-                workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
-            }
-
-            responses.add(new UserResponse(userResponses.get(i), AppUtil.getUrlUser(usr, false),
-                    AppUtil.getUrlUser(usr, true), workHistoryResponses, educations, skills, languages));
-        }
         return responses;
     }
 

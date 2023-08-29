@@ -35,9 +35,7 @@ public interface UserService {
     UserResponse updateProfile(String id, SubmitProfile profile);
     UserResponse applyJob(ApplyJob applyJob);
     Page<UserResponse> matchesCandidate(String major, int pageNumber, int pageSize);
-    Page<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status, int pageNumber, int pageSize);
     List<UserResponse> matchesCandidate(String major);
-    List<UserResponse> getAllCandidateByJobId(String jobId, JobStatus status);
     Page<UserResponse> searchUser(String keyword, int pageNumber, int pageSize);
     Page<UserResponse> getAccountCompany(String companyId, int pageNumber, int pageSize);
     List<UserResponse> getAccountCompany(String companyId);

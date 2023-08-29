@@ -35,15 +35,9 @@ public interface UserRepository extends JpaRepository<User, String> {
             " where CONCAT(u.email, u.firstName, u.lastName, u.phoneNumber) LIKE %?1% AND u.role = 1")
     Page<UserResponse> searchCandidate(@Param("keyword") String keyword, Pageable pageable);
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u, UserJob uj where u.id = uj.userId AND uj.jobId =:jobId AND uj.status =:status")
-    Page<UserResponse> getAllByJobIdAndStatus(@Param("jobId") String jobId, @Param("status") JobStatus status, Pageable pageable);
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u where u.major =:major")
+            " FROM User u, UserJob uj where u.major =:major AND u.id <> uj.userId")
     Page<UserResponse> getAllByMajor(@Param("major") String major, Pageable pageable);
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u, UserJob uj where u.id = uj.userId AND uj.jobId =:jobId AND uj.status =:status")
-    List<UserResponse> getAllByJobIdAndStatus(@Param("jobId") String jobId, @Param("status") JobStatus status);
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u where u.major =:major")
+            " FROM User u, UserJob uj where u.major =:major AND u.id <> uj.userId")
     List<UserResponse> getAllByMajor(@Param("major") String major);
 }
