@@ -69,7 +69,7 @@ public class UserJobResponse {
                            List<?> skills, List<?> languages) {
         this.id = u.getId();
         this.jobStatus = u.getJobStatus();
-        this.userId = u.getId();
+        this.userId = u.getUserId();
         this.jobId = u.getJobId();
         this.avatar = avatar;
         this.firstName = u.getFirstName();

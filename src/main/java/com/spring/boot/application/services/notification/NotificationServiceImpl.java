@@ -63,8 +63,8 @@ public class NotificationServiceImpl implements NotificationService{
     public List<Notification> markAllAsRead(String companyId) {
         List<Notification> notifications = notificationRepository.getAllByCompanyIdAndRead(companyId, false);
 
-        for (int i = 0; i < notifications.size(); i++) {
-            notifications.get(i).setRead(true);
+        for (Notification notification : notifications) {
+            notification.setRead(true);
         }
 
         return notificationRepository.saveAll(notifications);

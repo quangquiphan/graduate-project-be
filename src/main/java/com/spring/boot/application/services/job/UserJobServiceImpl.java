@@ -47,7 +47,7 @@ public class UserJobServiceImpl implements UserJobService{
     }
 
     @Override
-    public List<?> getAllUserByJobIdAndJobStatus(String jobId, JobStatus jobStatus) {
+    public List<UserJobResponse> getAllUserByJobIdAndJobStatus(String jobId, JobStatus jobStatus) {
         List<UserJobResponse> list = userJobRepository.getAllByJobIdAndStatus(jobId, jobStatus);
         List<UserJobResponse> responses = new ArrayList<>();
         for (UserJobResponse userJobResponse : list) {

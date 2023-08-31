@@ -31,9 +31,9 @@ public class NotificationController extends AbstractBaseController {
 
     @Operation(summary = "markAllAsRead")
     @AuthorizeValidator({UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(path = "/all/{companyId}", method = RequestMethod.PUT)
     public ResponseEntity<RestAPIResponse> markAllAsRead(
-            @PathVariable(name = "companyId") String companyId
+            @PathVariable String companyId
     ) {
         return responseUtil.successResponse(notificationService.markAllAsRead(companyId));
     }
