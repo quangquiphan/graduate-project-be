@@ -5,15 +5,13 @@ import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.JobStatus;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.utils.RestAPIResponse;
+import com.spring.boot.application.controller.model.request.company.ApplyJobRequest;
 import com.spring.boot.application.controller.model.response.PagingResponse;
 import com.spring.boot.application.services.job.JobService;
 import com.spring.boot.application.services.job.UserJobService;
 import com.spring.boot.application.services.user.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(ApiPath.USER_JOB_APIs)
@@ -29,14 +27,9 @@ public class UserJobController extends AbstractBaseController {
     @AuthorizeValidator(UserRole.ADMIN)
     @RequestMapping(path = "/matches", method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllCandidateMatches(
-            @RequestParam String major,
-            @RequestParam(defaultValue = "1") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam String major
     ) {
-        return responseUtil.successResponse(
-                new PagingResponse(userService.matchesCandidate(major, pageNumber, pageSize),
-                    userService.matchesCandidate(major))
-        );
+        return responseUtil.successResponse(userService.matchesCandidate(major));
     }
 
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
@@ -58,9 +51,8 @@ public class UserJobController extends AbstractBaseController {
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
     @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<RestAPIResponse> changeStatus(
-            @RequestParam String userJobId,
-            @RequestParam JobStatus status
+            @RequestBody ApplyJobRequest jobRequest
     ) {
-        return responseUtil.successResponse(userJobService.changeStatus(userJobId, status));
+        return responseUtil.successResponse(userJobService.changeStatus(jobRequest));
     }
 }

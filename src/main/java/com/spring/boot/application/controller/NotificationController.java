@@ -39,7 +39,7 @@ public class NotificationController extends AbstractBaseController {
     }
 
     @Operation(summary = "getAllNotificationByCompanyId")
-//    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllNotiByCompanyId(
             @RequestParam(name = "companyId") String companyId,

@@ -3,6 +3,7 @@ package com.spring.boot.application.repositories;
 import com.spring.boot.application.common.enums.JobStatus;
 import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
+import com.spring.boot.application.controller.model.response.job.UserJobResponse;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
 import com.spring.boot.application.entity.User;
 import org.springframework.data.domain.Page;
@@ -34,10 +35,7 @@ public interface UserRepository extends JpaRepository<User, String> {
             " FROM User u " +
             " where CONCAT(u.email, u.firstName, u.lastName, u.phoneNumber) LIKE %?1% AND u.role = 1")
     Page<UserResponse> searchCandidate(@Param("keyword") String keyword, Pageable pageable);
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u, UserJob uj where u.major =:major AND u.id <> uj.userId")
-    Page<UserResponse> getAllByMajor(@Param("major") String major, Pageable pageable);
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.user.UserResponse(u) " +
-            " FROM User u, UserJob uj where u.major =:major AND u.id <> uj.userId")
-    List<UserResponse> getAllByMajor(@Param("major") String major);
+    @Query(value = " SELECT DISTINCT new com.spring.boot.application.controller.model.response.job.UserJobResponse(u) " +
+            " FROM User u where u.major =:major AND u.id NOT IN (SELECT uj.userId FROM UserJob uj)")
+    List<UserJobResponse> getAllByMajor(@Param("major") String major);
 }

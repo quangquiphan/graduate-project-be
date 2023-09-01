@@ -40,6 +40,31 @@ public class UserJobResponse {
     private List<?> skills;
     private List<?> languages;
 
+    public UserJobResponse(User u) {
+        this.id = "";
+        this.jobStatus = null;
+        this.userId = u.getId();
+        this.jobId = "";
+        this.avatar = u.getAvatar();
+        this.firstName = u.getFirstName();
+        this.lastName = u.getLastName();
+        this.dateOfBirth = u.getDateOfBirth();
+        this.gender = u.getGender();
+        this.phoneNumber = u.getPhoneNumber();
+        this.email = u.getEmail();
+        this.address = u.getAddress();
+        this.yearExperience = u.getYearExperience();
+        this.cv = u.getCv();
+        this.role = u.getRole();
+        this.summary = u.getSummary();
+        this.position = u.getPosition();
+        this.major = u.getMajor();
+        this.link = u.getLink();
+        this.status = u.getStatus();
+        this.createdDate = null;
+        this.updatedDate = null;
+    }
+
     public UserJobResponse(User u, UserJob uj) {
         this.id = uj.getId();
         this.jobStatus = uj.getStatus();
@@ -61,8 +86,8 @@ public class UserJobResponse {
         this.major = u.getMajor();
         this.link = u.getLink();
         this.status = u.getStatus();
-        this.createdDate = u.getCreatedDate();
-        this.updatedDate = u.getUpdatedDate();
+        this.createdDate = uj.getCreatedDate();
+        this.updatedDate = uj.getUpdatedDate();
     }
 
     public UserJobResponse(UserJobResponse u, String avatar, String cv,

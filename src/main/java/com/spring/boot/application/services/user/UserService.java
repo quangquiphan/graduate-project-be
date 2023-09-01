@@ -9,6 +9,7 @@ import com.spring.boot.application.controller.model.request.user.AddMember;
 import com.spring.boot.application.controller.model.request.user.ApplyJob;
 import com.spring.boot.application.controller.model.request.user.SignUp;
 import com.spring.boot.application.controller.model.request.user.SubmitProfile;
+import com.spring.boot.application.controller.model.response.job.UserJobResponse;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,8 +35,7 @@ public interface UserService {
     UserResponse updateMember(String id, AddMember member);
     UserResponse updateProfile(String id, SubmitProfile profile);
     UserResponse applyJob(ApplyJob applyJob);
-    Page<UserResponse> matchesCandidate(String major, int pageNumber, int pageSize);
-    List<UserResponse> matchesCandidate(String major);
+    List<UserJobResponse> matchesCandidate(String major);
     Page<UserResponse> searchUser(String keyword, int pageNumber, int pageSize);
     Page<UserResponse> getAccountCompany(String companyId, int pageNumber, int pageSize);
     List<UserResponse> getAccountCompany(String companyId);

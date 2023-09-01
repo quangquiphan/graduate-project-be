@@ -4,6 +4,7 @@ import com.spring.boot.application.common.enums.JobStatus;
 import com.spring.boot.application.common.utils.AppUtil;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.Validator;
+import com.spring.boot.application.controller.model.request.company.ApplyJobRequest;
 import com.spring.boot.application.controller.model.response.job.UserJobResponse;
 import com.spring.boot.application.controller.model.response.skill.UserLangResponse;
 import com.spring.boot.application.controller.model.response.skill.UserSkillResponse;
@@ -37,11 +38,11 @@ public class UserJobServiceImpl implements UserJobService{
 
 
     @Override
-    public String changeStatus(String userJobId, JobStatus status) {
-        UserJob userJob = userJobRepository.getById(userJobId);
+    public String changeStatus(ApplyJobRequest jobRequest) {
+        UserJob userJob = userJobRepository.getById(jobRequest.getUserJobId());
         Validator.notNull(userJob, RestAPIStatus.NOT_FOUND, "");
 
-        userJob.setStatus(status);
+        userJob.setStatus(jobRequest.getStatus());
         userJobRepository.save(userJob);
         return "Successfully";
     }

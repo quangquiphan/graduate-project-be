@@ -14,6 +14,7 @@ import com.spring.boot.application.controller.model.request.user.ApplyJob;
 import com.spring.boot.application.controller.model.request.user.SignUp;
 import com.spring.boot.application.controller.model.request.user.SubmitProfile;
 import com.spring.boot.application.controller.model.response.experience.WorkHistoryResponse;
+import com.spring.boot.application.controller.model.response.job.UserJobResponse;
 import com.spring.boot.application.controller.model.response.skill.UserLangResponse;
 import com.spring.boot.application.controller.model.response.skill.UserSkillResponse;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
@@ -368,31 +369,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserResponse> matchesCandidate(String major, int pageNumber, int pageSize) {
-        PageRequest request = PageRequest.of(pageNumber - 1, pageSize);
-        return userRepository.getAllByMajor(major, request);
-    }
-
-    @Override
-    public List<UserResponse> matchesCandidate(String major) {
-        List<UserResponse> userResponses = userRepository.getAllByMajor(major);
-        List<UserResponse> responses = new ArrayList<>();
-
-        for (int i = 0; i < userResponses.size(); i++) {
-            User usr = userRepository.getById(userResponses.get(i).getId());
-            List<WorkHistoryResponse> workHistoryResponses = new ArrayList<>();
-            List<Education> educations = educationRepository.getAllByUserId(userResponses.get(i).getId());
-            List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(userResponses.get(i).getId());
-            List<Skill> skills = skillRepository.getAllByUserId(userResponses.get(i).getId());
-            List<Language> languages = languageRepository.getAllByUserId(userResponses.get(i).getId());
-
-            for (int j = 0; j < workHistories.size(); j++) {
-                List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
-                workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
-            }
-
-            responses.add(new UserResponse(userResponses.get(i), AppUtil.getUrlUser(usr, false),
-                    AppUtil.getUrlUser(usr, true), workHistoryResponses, educations, skills, languages));
+    public List<UserJobResponse> matchesCandidate(String major) {
+        List<UserJobResponse> userResponses = userRepository.getAllByMajor(major);
+        List<UserJobResponse> responses = new ArrayList<>();
+        for (UserJobResponse userJobResponse : userResponses) {
+            User user = userRepository.getById(userJobResponse.getUserId());
+            List<UserSkillResponse> skills = userSkillRepository.getAllByUserId(userJobResponse.getUserId());
+            List<UserLangResponse> languages = userLangRepository.getAllByUserId(userJobResponse.getUserId());
+            responses.add(new UserJobResponse(userJobResponse, AppUtil.getUrlUser(user, false),
+                    AppUtil.getUrlUser(user, true), skills, languages));
         }
 
         return responses;
