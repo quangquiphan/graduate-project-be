@@ -15,4 +15,7 @@ public interface CompanyRepository extends JpaRepository<Company, String> {
     @Query(value = " SELECT c FROM Company c " +
                    " WHERE CONCAT(c.email, c.companyName) LIKE %?1%")
     Page<Company> getPageCompany(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query(value = " SELECT COUNT(c.id) FROM Company c")
+    int countCompanies();
 }

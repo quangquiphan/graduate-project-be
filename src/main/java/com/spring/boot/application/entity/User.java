@@ -54,7 +54,7 @@ public class User extends BaseEntity implements Serializable {
     @Column(name = "date_of_birth")
     private Date dateOfBirth;
 
-    @Column(name = "summary")
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
     @Column(name = "position")

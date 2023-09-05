@@ -54,10 +54,7 @@ public interface JobRepository extends JpaRepository<Job, String> {
     )
     Page<JobResponse> getAllJobs(Pageable pageable);
 
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
-            " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
-            " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0 AND j.categoryJob =:major" +
-            " ORDER BY j.createdDate DESC "
+    @Query(value = " SELECT COUNT(j.id) FROM Job j WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0"
     )
-    Page<JobResponse> getAllJobsByMajor(@Param("major") String major, Pageable pageable);
+    int countJobs();
 }

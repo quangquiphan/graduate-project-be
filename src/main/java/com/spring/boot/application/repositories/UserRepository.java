@@ -38,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = " SELECT DISTINCT new com.spring.boot.application.controller.model.response.job.UserJobResponse(u) " +
             " FROM User u where u.major =:major AND u.id NOT IN (SELECT uj.userId FROM UserJob uj)")
     List<UserJobResponse> getAllByMajor(@Param("major") String major);
+
+    @Query(value = " SELECT COUNT(u.id) FROM User u WHERE u.role = 1")
+    int countCandidates();
 }
