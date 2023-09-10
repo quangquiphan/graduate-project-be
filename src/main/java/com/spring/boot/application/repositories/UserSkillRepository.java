@@ -14,7 +14,10 @@ import java.util.List;
 public interface UserSkillRepository extends JpaRepository<UserSkill, String> {
     UserSkill getBySkillIdAndStatus(String skillId, Status status);
 
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.skill.UserSkillResponse(us, s)" +
+    @Query(value = " SELECT us FROM UserSkill us WHERE us.userId =:userId")
+    List<UserSkill> getAllByUser(String userId);
+
+    @Query(value = " SELECT DISTINCT new com.spring.boot.application.controller.model.response.skill.UserSkillResponse(us, s)" +
                    " FROM Skill s, UserSkill us WHERE s.id = us.skillId AND us.userId =:userId")
     List<UserSkillResponse> getAllByUserId(@Param("userId") String userId);
 }

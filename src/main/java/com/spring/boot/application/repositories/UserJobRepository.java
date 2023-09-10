@@ -15,7 +15,7 @@ import java.util.List;
 public interface UserJobRepository extends JpaRepository<UserJob, String> {
     List<UserJob> getAllByJobId(String jobId);
     UserJob getById(String id);
-    @Query(value = " SELECT uj FROM UserJob uj " +
+    @Query(value = " SELECT DISTINCT uj FROM UserJob uj " +
             " WHERE uj.userId =:userId")
     List<UserJob> getByUserId(@Param("userId") String userId);
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.UserJobResponse(u, uj) " +

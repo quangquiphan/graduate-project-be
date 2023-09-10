@@ -13,7 +13,10 @@ import java.util.List;
 @Repository
 public interface UserLangRepository extends JpaRepository<UserLang, String> {
     UserLang getByLangIdAndStatus(String langId, Status status);
-    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.skill.UserLangResponse(ul, l)" +
+    @Query(value = " SELECT DISTINCT new com.spring.boot.application.controller.model.response.skill.UserLangResponse(ul, l)" +
                    " FROM Language l, UserLang ul WHERE l.id = ul.langId AND ul.userId =:userId")
     List<UserLangResponse> getAllByUserId(@Param("userId") String userId);
+
+    @Query(value = " SELECT ul FROM UserLang ul WHERE ul.userId =:userId")
+    List<UserLang> getAllByUser(String userId);
 }

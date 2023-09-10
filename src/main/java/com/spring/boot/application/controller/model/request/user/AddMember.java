@@ -20,4 +20,5 @@ public class AddMember {
     private String firstName;
     private String email;
     private UserRole role;
+    private String companyId;
 }

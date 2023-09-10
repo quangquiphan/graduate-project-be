@@ -27,9 +27,10 @@ public class UserJobController extends AbstractBaseController {
     @AuthorizeValidator(UserRole.ADMIN)
     @RequestMapping(path = "/matches", method = RequestMethod.GET)
     public ResponseEntity<RestAPIResponse> getAllCandidateMatches(
-            @RequestParam String major
+            @RequestParam String major,
+            @RequestParam String jobId
     ) {
-        return responseUtil.successResponse(userService.matchesCandidate(major));
+        return responseUtil.successResponse(userService.matchesCandidate(major, jobId));
     }
 
     @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER, UserRole.COMPANY_MEMBER})

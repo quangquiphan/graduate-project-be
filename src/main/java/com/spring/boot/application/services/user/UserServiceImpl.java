@@ -124,11 +124,13 @@ public class UserServiceImpl implements UserService {
         User user = new User();
 
         user.setId(UniqueID.getUUID());
+        user.setPasswordSalt(AppUtil.generateSalt());
         user.setFirstName(member.getFirstName());
         user.setLastName(member.getLastName());
         user.setEmail(member.getEmail());
         user.setRole(member.getRole());
         user.setStatus(Status.ACTIVE);
+        user.setCompanyId(member.getCompanyId());
         user.setActiveCode(UniqueID.generateUniqueToken(16));
 
         userRepository.save(user);
@@ -247,9 +249,9 @@ public class UserServiceImpl implements UserService {
         List<UserSkillResponse> skills = userSkillRepository.getAllByUserId(user.getId());
         List<UserLangResponse> languages = userLangRepository.getAllByUserId(user.getId());
         List<UserJob> userJobs = userJobRepository.getByUserId(user.getId());
-        for (int i = 0; i < workHistories.size(); i++) {
-            List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistories.get(i).getId());
-            workHistoryResponses.add(new WorkHistoryResponse(workHistories.get(i), projects));
+        for (WorkHistory workHistory : workHistories) {
+            List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistory.getId());
+            workHistoryResponses.add(new WorkHistoryResponse(workHistory, projects));
         }
 
         return new UserResponse(user, AppUtil.getUrlUser(user, false),
@@ -296,15 +298,16 @@ public class UserServiceImpl implements UserService {
                     profile.getSkills().get(i).setStatus(Status.IN_ACTIVE);
                 }
 
-                UserSkill skill = userSkillRepository.getBySkillIdAndStatus(profile.getSkills().get(i).getSkillId(),
-                        Status.ACTIVE);
-
                 if (Validator.isValidParam(profile.getSkills().get(i).getId()) &&
                         Validator.mustEquals(profile.getSkills().get(i).getStatus(), Status.IN_ACTIVE)) {
+
+                    UserSkill skill = userSkillRepository.getBySkillIdAndStatus(profile.getSkills().get(i).getSkillId(),
+                            Status.ACTIVE);
                     userSkillRepository.delete(skill);
                 }
 
-                if (!Validator.isValidObject(skill)) {
+                if (!Validator.isValidObject(profile.getSkills().get(i).getId()) &&
+                        Validator.mustEquals(profile.getSkills().get(i).getStatus(), Status.ACTIVE)) {
                     UserSkill s = new UserSkill();
                     s.setId(UniqueID.getUUID());
                     s.setUserId(user.getId());
@@ -325,15 +328,16 @@ public class UserServiceImpl implements UserService {
                     profile.getLanguages().get(i).setStatus(Status.IN_ACTIVE);
                 }
 
-                UserLang lang = userLangRepository.getByLangIdAndStatus(profile.getLanguages().get(i).getLangId(),
-                        Status.ACTIVE);
-
                 if (Validator.isValidParam(profile.getLanguages().get(i).getId()) &&
                         Validator.mustEquals(profile.getLanguages().get(i).getStatus(), Status.IN_ACTIVE)) {
+
+                    UserLang lang = userLangRepository.getByLangIdAndStatus(profile.getLanguages().get(i).getLangId(),
+                            Status.ACTIVE);
                     userLangRepository.delete(lang);
                 }
 
-                if (!Validator.isValidObject(lang)) {
+                if (!Validator.isValidObject(profile.getLanguages().get(i).getId()) &&
+                        Validator.mustEquals(profile.getLanguages().get(i).getStatus(), Status.ACTIVE)) {
                     UserLang l = new UserLang();
                     l.setId(UniqueID.getUUID());
                     l.setUserId(user.getId());
@@ -369,8 +373,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserJobResponse> matchesCandidate(String major) {
-        List<UserJobResponse> userResponses = userRepository.getAllByMajor(major);
+    public List<UserJobResponse> matchesCandidate(String major, String jobId) {
+        List<UserJobResponse> userResponses = userRepository.getAllByMajor(major, jobId);
         List<UserJobResponse> responses = new ArrayList<>();
         for (UserJobResponse userJobResponse : userResponses) {
             User user = userRepository.getById(userJobResponse.getUserId());
@@ -415,9 +419,27 @@ public class UserServiceImpl implements UserService {
     @Override
     public String deleteUser(String id, UserRole role) {
         User user = userRepository.getById(id);
+        List<UserSkill> userSkills = userSkillRepository.getAllByUser(id);
+        List<UserLang> userLangs = userLangRepository.getAllByUser(id);
+        List<UserJob> userJobs = userJobRepository.getByUserId(id);
+        List<Education> educations = educationRepository.getAllByUserId(id);
+        List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
 
-        userRepository.delete(checkRole(user, role));
+        if (!checkRole(user, role)) {
+            throw new ApplicationException(RestAPIStatus.FORBIDDEN, "Delete failed!");
+        }
+
+        userRepository.delete(user);
+        userSkillRepository.deleteAll(userSkills);
+        userLangRepository.deleteAll(userLangs);
+        userJobRepository.deleteAll(userJobs);
+        educationRepository.deleteAll(educations);
+        for (WorkHistory workHistory : workHistories) {
+            List<Project> projects = projectRepository.getAllByWorkHistoryId(workHistory.getId());
+            projectRepository.deleteAll(projects);
+        }
+        workHistoryRepository.deleteAll(workHistories);
         return "Delete successfully!";
     }
 
@@ -448,32 +470,35 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    private User checkRole(User u, UserRole role) {
+    private boolean checkRole(User u, UserRole role) {
         switch (role) {
             case ADMIN: {
                 break;
             }
 
             case COMPANY_ADMIN: {
-                if (u.getRole().equals(UserRole.ADMIN)) {
-                    throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+                if (u.getRole().equals(UserRole.ADMIN) ||
+                        u.getRole().equals(UserRole.COMPANY_ADMIN)) {
+                    return false;
                 }
                 break;
             }
 
             case COMPANY_ADMIN_MEMBER: {
-                if (u.getRole().equals(UserRole.ADMIN) || u.getRole().equals(UserRole.COMPANY_ADMIN)) {
-                    throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+                if (u.getRole().equals(UserRole.ADMIN) ||
+                        u.getRole().equals(UserRole.COMPANY_ADMIN) ||
+                        u.getRole().equals(UserRole.COMPANY_ADMIN_MEMBER)) {
+                    return false;
                 }
                 break;
             }
 
             case COMPANY_MEMBER:
             case USER: {
-                throw new ApplicationException(RestAPIStatus.FORBIDDEN);
+                return false;
             }
         }
 
-        return u;
+        return true;
     }
 }
