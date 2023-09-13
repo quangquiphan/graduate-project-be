@@ -228,7 +228,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
 
-        user = upload(user, "cv/", file, false);
+        user = upload(user, "cv/", file, true);
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
     }
 

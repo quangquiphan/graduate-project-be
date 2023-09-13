@@ -4,6 +4,7 @@ import com.spring.boot.application.common.enums.Gender;
 import com.spring.boot.application.common.enums.Status;
 import com.spring.boot.application.common.enums.UserRole;
 import com.spring.boot.application.common.enums.YearExperience;
+import com.spring.boot.application.common.utils.AppUtil;
 import com.spring.boot.application.common.utils.RestAPIStatus;
 import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.response.company.AuthCompany;
@@ -49,6 +50,8 @@ public class AuthUser implements UserDetails {
     @Getter
     private String position;
     @Getter
+    private String cv;
+    @Getter
     @Enumerated(EnumType.STRING)
     private YearExperience yearExperience;
     @Getter
@@ -77,6 +80,7 @@ public class AuthUser implements UserDetails {
         this.major = user.getMajor();
         this.link = user.getLink();
         this.status = user.getStatus();
+        this.cv = AppUtil.getUrlUser(user, true);
     }
 
     public AuthUser(User user, AuthCompany c) {
@@ -96,6 +100,7 @@ public class AuthUser implements UserDetails {
         this.major = user.getMajor();
         this.link = user.getLink();
         this.status = user.getStatus();
+        this.cv = AppUtil.getUrlUser(user, true);
         this.company = c;
     }
 
