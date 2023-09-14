@@ -419,12 +419,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public String deleteUser(String id, UserRole role) {
         User user = userRepository.getById(id);
-        List<UserSkill> userSkills = userSkillRepository.getAllByUser(id);
-        List<UserLang> userLangs = userLangRepository.getAllByUser(id);
-        List<UserJob> userJobs = userJobRepository.getByUserId(id);
-        List<Education> educations = educationRepository.getAllByUserId(id);
-        List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
+        List<UserSkill> userSkills = userSkillRepository.getAllByUser(user.getId());
+        List<UserLang> userLangs = userLangRepository.getAllByUser(user.getId());
+        List<UserJob> userJobs = userJobRepository.getByUserId(user.getId());
+        List<Education> educations = educationRepository.getAllByUserId(user.getId());
+        List<WorkHistory> workHistories = workHistoryRepository.getAllByUserId(user.getId());
 
         if (!checkRole(user, role)) {
             throw new ApplicationException(RestAPIStatus.FORBIDDEN, "Delete failed!");
