@@ -4,10 +4,15 @@ package com.spring.boot.application.common.utils;
 import com.spring.boot.application.entity.Company;
 import com.spring.boot.application.entity.User;
 import com.spring.boot.application.repositories.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Random;
@@ -15,6 +20,9 @@ import java.util.Random;
 @Component
 public class AppUtil {
     public static final Random RANDOM = new SecureRandom();
+
+    @Value("${app.file.storage.mapping}")
+    private static String path;
 
     public static String generateSalt() {
         byte[] salt = new byte[Constant.SALT_LENGTH];
@@ -46,6 +54,25 @@ public class AppUtil {
                     .toUriString();
 
         return "";
+    }
+
+    public static User deleteURL(User user, boolean isCV) throws IOException {
+        Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
+        if (!isCV && Validator.isValidParam(user.getAvatar())) {
+            File deleteFile = new File("src/main/resources/static/images/" + user.getAvatar());
+            if (deleteFile.delete()) {
+                user.setCv("");
+            }
+            return user;
+        }
+
+        if (isCV && Validator.isValidParam(user.getCv())) {
+            Path fileToDeletePath = Paths.get("src/main/resources/static/cv/" + user.getCv());
+            Files.delete(fileToDeletePath);
+            user.setCv("");
+            return user;
+        }
+        return user;
     }
 
     public static String getUrlCompany(Company c) throws IOException {

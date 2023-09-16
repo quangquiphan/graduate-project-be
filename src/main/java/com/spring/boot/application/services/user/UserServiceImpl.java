@@ -227,6 +227,11 @@ public class UserServiceImpl implements UserService {
     public UserResponse uploadCV(String id, MultipartFile file) throws IOException {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+        System.out.println(file);
+        if (Validator.isValidParam(user.getCv())) {
+            AppUtil.deleteURL(user, true);
+        }
+
 
         user = upload(user, "cv/", file, true);
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
