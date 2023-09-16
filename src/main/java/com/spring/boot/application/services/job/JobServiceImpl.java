@@ -57,7 +57,7 @@ public class JobServiceImpl implements JobService {
             LanguageJob lj = languageJobRepository.getByLanguageIdAndJobId(jobRequest.getLanguages().get(i).getLanguageId(),
                     job.getId());
 
-            if (!Validator.isValidObject(lj)){
+            if (!Validator.isValidObject(lj)) {
                 LanguageJob langJob = new LanguageJob();
 
                 langJob.setId(UniqueID.getUUID());
@@ -72,7 +72,7 @@ public class JobServiceImpl implements JobService {
         for (int i = 0; i < jobRequest.getSkills().size(); i++) {
             SkillJob sj = skillJobRepository.getBySkillIdAndJobId(jobRequest.getSkills().get(i).getSkillId(),
                     job.getId());
-            if (!Validator.isValidObject(sj)){
+            if (!Validator.isValidObject(sj)) {
                 SkillJob skillJob = new SkillJob();
 
                 skillJob.setId(UniqueID.getUUID());
@@ -105,7 +105,7 @@ public class JobServiceImpl implements JobService {
         List<LanguageJob> languageJobs = new ArrayList<>();
 
         for (int i = 0; i < jobRequest.getLanguages().size(); i++) {
-            if (Validator.isValidParam(jobRequest.getLanguages().get(i).getId())){
+            if (Validator.isValidParam(jobRequest.getLanguages().get(i).getId())) {
                 if (Validator.mustEquals(jobRequest.getLanguages().get(i).getStatus(), Status.IN_ACTIVE)) {
                     languageJobRepository.deleteById(jobRequest.getLanguages().get(i).getLanguageId());
                 } else {
@@ -129,7 +129,7 @@ public class JobServiceImpl implements JobService {
         }
 
         for (int i = 0; i < jobRequest.getSkills().size(); i++) {
-            if (Validator.isValidParam(jobRequest.getSkills().get(i).getId())){
+            if (Validator.isValidParam(jobRequest.getSkills().get(i).getId())) {
                 if (Validator.mustEquals(jobRequest.getSkills().get(i).getStatus(), Status.IN_ACTIVE)) {
                     skillJobRepository.deleteById(jobRequest.getSkills().get(i).getSkillId());
                 } else {
@@ -222,35 +222,20 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobResponse> searchJobs(String searchKey) {
-        List<JobResponse> jobs = new ArrayList<JobResponse>();
-        List<Company> companies = companyRepository.findAll();
-        try {
-            Map<String, String> map = new HashMap<>();
+        List<JobResponse> jobs = new ArrayList<>();
+        if (Validator.isValidParam(searchKey)) {
+            List<JobResponse> j = jobRepository.getBySearchKey(searchKey);
 
-            for (Company company : companies) {
-                    map.put(company.getId(),
-                            AppUtil.getUrlCompany(company));
+            for (JobResponse jobResponse : j) {
+                jobs.add(new JobResponse(jobResponse, getCompanyAvatar(jobResponse.getCompanyId())));
             }
+        } else {
+            List<JobResponse> j = jobRepository.getAllJobs();
 
-            if (Validator.isValidParam(searchKey)) {
-                List<JobResponse> j = jobRepository.getBySearchKey(searchKey);
-
-                for (JobResponse jobResponse : j) {
-                    String url = map.get(jobResponse.getCompanyId());
-                    jobs.add(new JobResponse(jobResponse, url));
-                }
-            } else {
-                List<JobResponse> j = jobRepository.getAllJobs();
-
-                for (JobResponse jobResponse : j) {
-                    String url = map.get(jobResponse.getCompanyId());
-                    jobs.add(new JobResponse(jobResponse, url));
-                }
+            for (JobResponse jobResponse : j) {
+                jobs.add(new JobResponse(jobResponse, getCompanyAvatar(jobResponse.getCompanyId())));
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
-
         return jobs;
     }
 
@@ -321,16 +306,30 @@ public class JobServiceImpl implements JobService {
             String url = AppUtil.getUrlCompany(company);
 
             List<JobResponse> jobResponses = new ArrayList<>();
-            for (int i = 0; i < jobs.size(); i++) {
-                List<SkillJobResponse> skills = skillJobRepository.getAllByJobId(jobs.get(i).getId());
-                List<LangJobResponse> langs = languageJobRepository.getAllByJobId(jobs.get(i).getId());
-                jobResponses.add(new JobResponse(jobs.get(i), url, company.getCompanyName(),
-                        jobs.get(i).getCompanyId(), skills, langs));
+            for (Job job : jobs) {
+                List<SkillJobResponse> skills = skillJobRepository.getAllByJobId(job.getId());
+                List<LangJobResponse> langs = languageJobRepository.getAllByJobId(job.getId());
+                jobResponses.add(new JobResponse(job, url, company.getCompanyName(),
+                        job.getCompanyId(), skills, langs));
             }
 
             return jobResponses;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getCompanyAvatar(String companyId) {
+        Company c = companyRepository.getById(companyId);
+
+        if (Validator.isValidObject(c)) {
+            try {
+                return AppUtil.getUrlCompany(c);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return "";
     }
 }

@@ -38,9 +38,15 @@ public class CompanyController extends AbstractBaseController {
     public ResponseEntity<RestAPIResponse> getAllCompany(
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
-    ) throws IOException {
+    ) {
         return responseUtil.successResponse(
-                new PagingResponse(companyService.getAllCompany(pageNumber, pageSize), companyService.getListCompany()));
+                new PagingResponse(companyService.getAllCompany(pageNumber, pageSize)));
+    }
+
+    @Operation(summary = "getAllCompany")
+    @RequestMapping(path = "/list", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> getListCompany() throws IOException {
+        return responseUtil.successResponse(companyService.getListCompany());
     }
 
     @Operation(summary = "getCompany")
