@@ -63,7 +63,6 @@ public class EmailServiceImpl implements EmailService{
 
             helper.setText(thymeleafService.createdContent("confirm-register-account.html", variables), true);
 
-            System.out.println(user);
             mailSender.send(message);
         } catch (Exception e) {
             e.getMessage();

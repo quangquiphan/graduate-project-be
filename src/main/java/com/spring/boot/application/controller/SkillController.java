@@ -77,7 +77,7 @@ public class SkillController extends AbstractBaseController {
     }
 
     @Operation(summary = "deleteSkill")
-    @AuthorizeValidator(UserRole.ADMIN)
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN})
     @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<RestAPIResponse> deleteSkill(
             @PathVariable(name = "id") String id

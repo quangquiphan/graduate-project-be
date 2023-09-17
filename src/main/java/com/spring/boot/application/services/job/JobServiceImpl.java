@@ -226,8 +226,8 @@ public class JobServiceImpl implements JobService {
         if (Validator.isValidParam(searchKey)) {
             List<JobResponse> j = jobRepository.getBySearchKey(searchKey);
 
-            for (JobResponse jobResponse : j) {
-                jobs.add(new JobResponse(jobResponse, getCompanyAvatar(jobResponse.getCompanyId())));
+            for (JobResponse item : j) {
+                jobs.add(new JobResponse(item, getCompanyAvatar(item.getCompanyId())));
             }
         } else {
             List<JobResponse> j = jobRepository.getAllJobs();

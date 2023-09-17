@@ -70,6 +70,7 @@ public class JobResponse {
         this.expiryDate = j.getExpiryDate();
         this.companyName = c.getCompanyName();
         this.companyAvatar = c.getAvatar();
+        this.companyId = c.getId();
     }
 
     public JobResponse(JobResponse j, String avatar) {
