@@ -1,6 +1,7 @@
 package com.spring.boot.application.repositories;
 
 import com.spring.boot.application.common.enums.JobStatus;
+import com.spring.boot.application.controller.model.response.job.JobsAppliedResponse;
 import com.spring.boot.application.controller.model.response.job.UserJobResponse;
 import com.spring.boot.application.controller.model.response.user.UserResponse;
 import com.spring.boot.application.entity.UserJob;
@@ -21,4 +22,11 @@ public interface UserJobRepository extends JpaRepository<UserJob, String> {
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.UserJobResponse(u, uj) " +
             " FROM User u, UserJob uj where u.id = uj.userId AND uj.jobId =:jobId AND uj.status =:status")
     List<UserJobResponse> getAllByJobIdAndStatus(@Param("jobId") String jobId, @Param("status") JobStatus status);
+
+    @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobsAppliedResponse(j, c, uj) " +
+            " FROM Job j, Company c, UserJob uj" +
+            " WHERE j.id = uj.jobId AND j.companyId = c.id AND uj.userId =:userId" +
+            " ORDER BY DATE_FORMAT(uj.createdDate, '%d%m%y') DESC"
+    )
+    List<JobsAppliedResponse> getAllJobApplied(@Param("userId") String userId);
 }

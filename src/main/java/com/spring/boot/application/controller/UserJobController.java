@@ -1,9 +1,11 @@
 package com.spring.boot.application.controller;
 
 import com.spring.boot.application.common.AbstractBaseController;
+import com.spring.boot.application.common.auth.AuthUser;
 import com.spring.boot.application.common.auth.AuthorizeValidator;
 import com.spring.boot.application.common.enums.JobStatus;
 import com.spring.boot.application.common.enums.UserRole;
+import com.spring.boot.application.common.utils.Constant;
 import com.spring.boot.application.common.utils.RestAPIResponse;
 import com.spring.boot.application.controller.model.request.company.ApplyJobRequest;
 import com.spring.boot.application.controller.model.response.PagingResponse;
@@ -12,6 +14,8 @@ import com.spring.boot.application.services.job.UserJobService;
 import com.spring.boot.application.services.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping(ApiPath.USER_JOB_APIs)
@@ -55,5 +59,22 @@ public class UserJobController extends AbstractBaseController {
             @RequestBody ApplyJobRequest jobRequest
     ) {
         return responseUtil.successResponse(userJobService.changeStatus(jobRequest));
+    }
+
+    @RequestMapping(path = "/history", method = RequestMethod.GET)
+    public ResponseEntity<RestAPIResponse> getAllJobsApplied(
+            HttpServletRequest request
+    ) {
+        AuthUser authUser = jwtTokenUtil.getUserIdFromJWT(request.getHeader(Constant.HEADER_TOKEN));
+        return responseUtil.successResponse(userJobService.getJobsApplied(authUser.getId()));
+    }
+
+    @AuthorizeValidator({UserRole.ADMIN, UserRole.COMPANY_ADMIN, UserRole.COMPANY_ADMIN_MEMBER,
+            UserRole.COMPANY_MEMBER, UserRole.USER})
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<RestAPIResponse> deleteUserJob(
+            @PathVariable String id
+    ) {
+        return responseUtil.successResponse(userJobService.deleteUserJob(id));
     }
 }
