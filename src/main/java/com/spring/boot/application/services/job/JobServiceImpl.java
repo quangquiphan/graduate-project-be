@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -28,16 +26,19 @@ public class JobServiceImpl implements JobService {
     final private SkillJobRepository skillJobRepository;
     final private LanguageJobRepository languageJobRepository;
     final private UserJobRepository userJobRepository;
+    final private NotificationRepository notificationRepository;
 
     public JobServiceImpl(CompanyRepository companyRepository, JobRepository jobRepository,
                           SkillJobRepository skillJobRepository,
                           LanguageJobRepository languageJobRepository,
-                          UserJobRepository userJobRepository) {
+                          UserJobRepository userJobRepository,
+                          NotificationRepository notificationRepository) {
         this.companyRepository = companyRepository;
         this.jobRepository = jobRepository;
         this.skillJobRepository = skillJobRepository;
         this.languageJobRepository = languageJobRepository;
         this.userJobRepository = userJobRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -261,6 +262,25 @@ public class JobServiceImpl implements JobService {
         }
 
         jobRepository.delete(job);
+        return "Delete successfully!";
+    }
+
+    @Override
+    public String deleteExpiryDateJob() {
+        List<Job> jobs = jobRepository.getAllJobsExpiryDate();
+
+        for (Job i : jobs) {
+            List<SkillJob> skillJobs = skillJobRepository.findAllByJobId(i.getId());
+            List<LanguageJob> languageJobs = languageJobRepository.findAllByJobId(i.getId());
+            List<UserJob> userJobs = userJobRepository.getAllByJobId(i.getId());
+
+            skillJobRepository.deleteAll(skillJobs);
+            languageJobRepository.deleteAll(languageJobs);
+            userJobRepository.deleteAll(userJobs);
+        }
+
+        jobRepository.deleteAll(jobs);
+
         return "Delete successfully!";
     }
 

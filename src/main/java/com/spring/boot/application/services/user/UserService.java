@@ -39,5 +39,5 @@ public interface UserService {
     Page<UserResponse> searchUser(String keyword, int pageNumber, int pageSize);
     Page<UserResponse> getAccountCompany(String companyId, int pageNumber, int pageSize);
     List<UserResponse> getAccountCompany(String companyId);
-    String deleteUser(String id, UserRole role);
+    String deleteUser(String id, UserRole role) throws IOException;
 }

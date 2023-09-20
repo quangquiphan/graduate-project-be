@@ -1,6 +1,7 @@
 package com.spring.boot.application.common.utils;
 
 
+import com.spring.boot.application.common.exceptions.ApplicationException;
 import com.spring.boot.application.entity.Company;
 import com.spring.boot.application.entity.User;
 import com.spring.boot.application.repositories.UserRepository;
@@ -58,26 +59,29 @@ public class AppUtil {
 
     public static User deleteURL(User user, boolean isCV) throws IOException {
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
-        if (!isCV && Validator.isValidParam(user.getAvatar())) {
-            File deleteFile = new File("src/main/resources/static/images/" + user.getAvatar());
-            if (deleteFile.delete()) {
+        try {
+            if (!isCV && Validator.isValidParam(user.getAvatar())) {
+                Path fileToDeletePath = Paths.get("src/main/resources/static/images/" + user.getAvatar());
+                Files.delete(fileToDeletePath);
+                user.setAvatar("");
+                return user;
+            }
+
+            if (isCV && Validator.isValidParam(user.getCv())) {
+                Path fileToDeletePath = Paths.get("src/main/resources/static/cv/" + user.getCv());
+                Files.delete(fileToDeletePath);
                 user.setCv("");
+                return user;
             }
             return user;
+        } catch (Exception e) {
+            throw new ApplicationException(RestAPIStatus.FAIL);
         }
-
-        if (isCV && Validator.isValidParam(user.getCv())) {
-            Path fileToDeletePath = Paths.get("src/main/resources/static/cv/" + user.getCv());
-            Files.delete(fileToDeletePath);
-            user.setCv("");
-            return user;
-        }
-        return user;
     }
 
     public static String getUrlCompany(Company c) throws IOException {
         Validator.notNullAndNotEmpty(c, RestAPIStatus.NOT_FOUND, "User not found");
-        if (!Validator.isValidParam(c.getAvatar())){
+        if (!Validator.isValidParam(c.getAvatar())) {
             return "";
         }
 
@@ -86,6 +90,14 @@ public class AppUtil {
                 .path("/static/images/")
                 .path(c.getAvatar())
                 .toUriString();
+    }
+
+    public static Company deleteAvatarCompany(Company c) throws IOException {
+        Path fileToDeletePath = Paths.get("src/main/resources/static/images/" + c.getAvatar());
+        Files.delete(fileToDeletePath);
+        c.setAvatar("");
+
+        return c;
     }
 
     public static String getLogo() {

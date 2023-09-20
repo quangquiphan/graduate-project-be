@@ -211,6 +211,9 @@ public class UserServiceImpl implements UserService {
     public UserResponse uploadAvatar(String id, MultipartFile file) throws IOException {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "");
+        if (Validator.isValidParam(user.getCv())) {
+            AppUtil.deleteURL(user, false);
+        }
 
         user = upload(user, "images/", file, false);
 
@@ -230,7 +233,6 @@ public class UserServiceImpl implements UserService {
         if (Validator.isValidParam(user.getCv())) {
             AppUtil.deleteURL(user, true);
         }
-
 
         user = upload(user, "cv/", file, true);
         return new UserResponse(user, AppUtil.getUrlUser(user, false), AppUtil.getUrlUser(user, true));
@@ -421,7 +423,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String deleteUser(String id, UserRole role) {
+    public String deleteUser(String id, UserRole role) throws IOException {
         User user = userRepository.getById(id);
         Validator.notNullAndNotEmpty(user, RestAPIStatus.NOT_FOUND, "User not found");
         List<UserSkill> userSkills = userSkillRepository.getAllByUser(user.getId());
@@ -433,6 +435,9 @@ public class UserServiceImpl implements UserService {
         if (!checkRole(user, role)) {
             throw new ApplicationException(RestAPIStatus.FORBIDDEN, "Delete failed!");
         }
+
+        AppUtil.deleteURL(user, true);
+        AppUtil.deleteURL(user, false);
 
         userRepository.delete(user);
         userSkillRepository.deleteAll(userSkills);

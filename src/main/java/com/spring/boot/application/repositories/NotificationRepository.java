@@ -14,6 +14,9 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, String> {
     Notification getById(String id);
+    @Query(value = " SELECT n FROM Notification n WHERE n.jobId=:jobId ORDER BY n.createdDate DESC")
+    List<Notification> getAllByJobId(@Param("jobId") String jobId);
+
     @Query(value = " SELECT n FROM Notification n WHERE n.companyId=:companyId ORDER BY n.createdDate DESC")
     List<Notification> getAllByCompanyId(@Param("companyId") String companyId);
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.company.NotificationResponse(u, j, n)" +

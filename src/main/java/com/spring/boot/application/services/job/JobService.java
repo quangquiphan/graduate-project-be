@@ -18,4 +18,5 @@ public interface JobService {
     List<JobResponse> getListJobsRecommend(String major);
     List<JobResponse> searchJobs(String searchKey);
     String deleteJob(String id);
+    String deleteExpiryDateJob();
 }

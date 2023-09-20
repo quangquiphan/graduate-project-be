@@ -146,7 +146,7 @@ public class UserController extends AbstractBaseController {
     public ResponseEntity<RestAPIResponse> deleteUser(
             @PathVariable(name = "id") String id,
             HttpServletRequest request
-    ) {
+    ) throws IOException{
         AuthUser authUser = jwtTokenUtil.getUserIdFromJWT(request.getHeader(Constant.HEADER_TOKEN));
         return responseUtil.successResponse(userService.deleteUser(id, authUser.getRole()));
     }

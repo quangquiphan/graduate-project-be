@@ -6,9 +6,7 @@ import com.spring.boot.application.common.utils.UniqueID;
 import com.spring.boot.application.common.utils.Validator;
 import com.spring.boot.application.controller.model.request.company.CompanyRequest;
 import com.spring.boot.application.controller.model.response.company.CompanyResponse;
-import com.spring.boot.application.controller.model.response.job.JobResponse;
-import com.spring.boot.application.entity.Company;
-import com.spring.boot.application.entity.Job;
+import com.spring.boot.application.entity.*;
 import com.spring.boot.application.repositories.*;
 import com.spring.boot.application.services.mail.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +31,8 @@ public class CompanyServiceImpl implements CompanyService {
     final private SkillJobRepository skillJobRepository;
     final private LanguageJobRepository languageJobRepository;
     final private UserRepository userRepository;
+    final private UserJobRepository userJobRepository;
+    final private NotificationRepository notificationRepository;
     final private JobRepository jobRepository;
 
     public CompanyServiceImpl(
@@ -40,11 +40,15 @@ public class CompanyServiceImpl implements CompanyService {
             SkillJobRepository skillJobRepository,
             LanguageJobRepository languageJobRepository,
             UserRepository userRepository,
+            UserJobRepository userJobRepository,
+            NotificationRepository notificationRepository,
             JobRepository jobRepository) {
         this.companyRepository = companyRepository;
         this.skillJobRepository = skillJobRepository;
         this.languageJobRepository = languageJobRepository;
         this.userRepository = userRepository;
+        this.userJobRepository = userJobRepository;
+        this.notificationRepository = notificationRepository;
         this.jobRepository = jobRepository;
     }
 
@@ -78,6 +82,9 @@ public class CompanyServiceImpl implements CompanyService {
     public Company uploadAvatar(String id, MultipartFile file) throws IOException {
         Company company = companyRepository.getById(id);
         Validator.notNullAndNotEmpty(company, RestAPIStatus.NOT_FOUND, "");
+        if (Validator.isValidParam(company.getAvatar())) {
+            AppUtil.deleteAvatarCompany(company);
+        }
 
         return upload(company, "images/", file);
     }
@@ -135,7 +142,22 @@ public class CompanyServiceImpl implements CompanyService {
     public String deleteCompany(String id) {
         Company company = companyRepository.getById(id);
         Validator.notNullAndNotEmpty(company, RestAPIStatus.NOT_FOUND, "");
+        List<Job> jobs = jobRepository.getAllJobsByCompanyId(id);
 
+        for (Job i : jobs) {
+            List<SkillJob> skillJobs = skillJobRepository.findAllByJobId(i.getId());
+            List<LanguageJob> languageJobs = languageJobRepository.findAllByJobId(i.getId());
+            List<UserJob> userJobs = userJobRepository.getAllByJobId(i.getId());
+
+            skillJobRepository.deleteAll(skillJobs);
+            languageJobRepository.deleteAll(languageJobs);
+            userJobRepository.deleteAll(userJobs);
+        }
+
+        List<Notification> notifications = notificationRepository.getAllByCompanyId(id);
+
+        jobRepository.deleteAll(jobs);
+        notificationRepository.deleteAll(notifications);
         companyRepository.delete(company);
         return "Delete successfully!";
     }

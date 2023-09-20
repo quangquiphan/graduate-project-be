@@ -16,6 +16,11 @@ public interface JobRepository extends JpaRepository<Job, String> {
     Job getById(String id);
 
     @Query(value = " SELECT j FROM Job j " +
+            " WHERE j.companyId =:companyId"
+    )
+    List<Job> getAllJobsByCompanyId(@Param("companyId") String companyId);
+
+    @Query(value = " SELECT j FROM Job j " +
                    " WHERE j.companyId =:companyId AND DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
                    " ORDER BY DATE_FORMAT(j.createdDate, '%d%m%y') DESC "
     )
@@ -41,6 +46,12 @@ public interface JobRepository extends JpaRepository<Job, String> {
     )
     List<JobResponse> getAllJobs();
 
+    @Query(value = " SELECT j " +
+            " FROM Job j" +
+            " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) < -30"
+    )
+    List<Job> getAllJobsExpiryDate();
+
     @Query(value = " SELECT new com.spring.boot.application.controller.model.response.job.JobResponse(j, c) " +
             " FROM Job j INNER JOIN Company c ON j.companyId = c.id" +
             " WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0" +
@@ -48,7 +59,6 @@ public interface JobRepository extends JpaRepository<Job, String> {
     )
     Page<JobResponse> getAllJobs(Pageable pageable);
 
-    @Query(value = " SELECT COUNT(j.id) FROM Job j WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0"
-    )
+    @Query(value = " SELECT COUNT(j.id) FROM Job j WHERE DATEDIFF(j.expiryDate, CURRENT_DATE) > 0")
     int countJobs();
 }
