@@ -155,7 +155,9 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         List<Notification> notifications = notificationRepository.getAllByCompanyId(id);
+        List<User> users = userRepository.getAllByCompanyId(id);
 
+        userRepository.deleteAll(users);
         jobRepository.deleteAll(jobs);
         notificationRepository.deleteAll(notifications);
         companyRepository.delete(company);
